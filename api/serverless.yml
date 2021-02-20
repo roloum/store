@@ -1,0 +1,67 @@
+service: store
+# app and org for use with dashboard.serverless.com
+#app: your-app-name
+#org: your-org-name
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: go1.x
+  apiGateway: {
+    shouldStartNameWithService: true
+  }
+  stage: ${opt:stage, 'dev'}
+  region: ${self:provider.environment.STORE_AWS_REGION}
+  environment:
+    STORE_AWS_DYNAMODB_TABLE_STORE: ${env:STORE_AWS_DYNAMODB_TABLE_STORE}
+    STORE_AWS_REGION: ${env:STORE_AWS_REGION}
+    STORE_LOG_LEVEL: ${env:STORE_LOG_LEVEL}
+
+
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:GetItem
+      Resource:
+        - Fn::GetAtt: [storeTable, Arn]
+
+resources:
+  Resources:
+    storeTable:
+      Type: AWS::DynamoDB::Table
+      # DeletionPolicy: Retain
+      Properties:
+        TableName: ${self:provider.environment.STORE_AWS_DYNAMODB_TABLE_STORE}
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+          - AttributeName: sk
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pk
+            KeyType: HASH
+          - AttributeName: sk
+            KeyType: RANGE
+
+package:
+  exclude:
+    - ./**
+  include:
+    - ./bin/**
+
+functions:
+  cart:
+    handler: bin/cart
+    events:
+      - http:
+          path: cart
+          method: get
