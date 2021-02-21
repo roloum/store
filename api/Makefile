@@ -6,7 +6,7 @@ TEST_CMD= go test -timeout 30s
 
 .PHONY: test
 test:
-#	${TEST_CMD} ${BASE_DIR}/internal/store
+	${TEST_CMD} ${BASE_DIR}/internal/store/cart/
 
 build:
 	export GO111MODULE=on

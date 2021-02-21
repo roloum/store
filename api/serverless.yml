@@ -62,6 +62,21 @@ functions:
   cart:
     handler: bin/cart
     events:
+      # Retrieves the content of the cart from the database
+      - http:
+          path: cart/{cartId}
+          method: get
+      # Creates the shopping cart and adds the first product
       - http:
           path: cart
-          method: get
+          method: post
+      # Adds a product to the shopping cart
+      - http:
+          path: cart/{cartId}
+          method: post
+      - http:
+          path: cart/{cartId}/items/{productId}
+          method: patch
+      - http:
+          path: cart/{cartId}/items/{productId}
+          method: delete

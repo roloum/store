@@ -14,6 +14,11 @@ import (
 	"github.com/roloum/store/api/internal/config"
 )
 
+const (
+	//MsgProductAdded message returned product is added to cart
+	MsgProductAdded = "ProductAdded"
+)
+
 type (
 
 	// activateResponse
@@ -45,10 +50,39 @@ func Handler(ctx context.Context, dynamoDB *dynamodb.DynamoDB,
 	request events.APIGatewayProxyRequest,
 	cfg configuration) (Response, error) {
 
-	msg := "Successfully deployed function body"
-	log.Info().Msg(msg)
+	//Missing parameters? http.StatusBadRequest
 
-	return getResponse(http.StatusOK, msg)
+	var response int
+	var message string
+
+	switch request.HTTPMethod {
+	case http.MethodPost:
+		//Adds a product to the shopping cart request.PathParameters["cartId"].
+		//If it's the first product, it creates the shopping cart first
+		response = http.StatusCreated
+		message = MsgProductAdded
+
+	case http.MethodGet:
+		//Retrieves cart for request.PathParameters["cartId"]
+		response = http.StatusOK
+
+	case http.MethodPatch:
+		//Udpdates the quantity for product request.PathParameters["productId"]
+		//in cartId request.PathParameters["cartId"]
+		response = http.StatusNoContent
+
+	case http.MethodDelete:
+		//Deletes product request.PathParameters["productId"]
+		//from cartId request.PathParameters["cartId"]
+		response = http.StatusNoContent
+
+	default:
+		return getResponse(http.StatusMethodNotAllowed, "")
+	}
+
+	log.Info().Msg(message)
+
+	return getResponse(response, message)
 }
 
 // getResponse builds an API Gateway Response
