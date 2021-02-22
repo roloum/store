@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
 	"github.com/rs/zerolog/log"
@@ -12,27 +11,18 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	saws "github.com/roloum/store/api/internal/aws"
 	"github.com/roloum/store/api/internal/config"
+	"github.com/roloum/store/api/internal/store/cart"
+	"github.com/roloum/store/api/internal/web"
 )
 
 const (
-	//MsgProductAdded message returned product is added to cart
-	MsgProductAdded = "ProductAdded"
+	//MsgItemAdded message returned item is added to cart
+	MsgItemAdded = "ItemAdded"
 )
 
+//Configuration Struct will be populated from environment variables
+//Using github.com/kelseyhightower/envconfig
 type (
-
-	// activateResponse
-	activateResponse struct {
-		StatusCode int    `json:"status"`
-		Message    string `json:"message"`
-	}
-
-	// Response is of type APIGatewayProxyResponse since we're leveraging the
-	// AWS Lambda Proxy Request functionality (default behavior)
-	//
-	// https://serverless.com/framework/docs/providers/aws/events/apigateway/#lambda-proxy-integration
-	Response events.APIGatewayProxyResponse
-
 	configuration struct {
 		AWS struct {
 			DynamoDB struct {
@@ -48,81 +38,69 @@ type (
 // Handler is our lambda handler invoked by the `lambda.Start` function call
 func Handler(ctx context.Context, dynamoDB *dynamodb.DynamoDB,
 	request events.APIGatewayProxyRequest,
-	cfg configuration) (Response, error) {
+	cfg configuration) (events.APIGatewayProxyResponse, error) {
 
 	//Missing parameters? http.StatusBadRequest
 
-	var response int
-	var message string
+	//Instantiate cart API Handler
+	c, err := cart.New(dynamoDB, cfg.AWS.DynamoDB.Table.Store)
+	if err != nil {
+		return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
+	}
 
 	switch request.HTTPMethod {
 	case http.MethodPost:
-		//Adds a product to the shopping cart request.PathParameters["cartId"].
-		//If it's the first product, it creates the shopping cart first
-		response = http.StatusCreated
-		message = MsgProductAdded
+		//Adds a item to the shopping cart request.PathParameters["cart_id"].
+		//If cart_id is not set, it creates the shopping cart first
+
+		cartID := request.QueryStringParameters["cart_id"]
+
+		var shoppingCart *cart.Info
+
+		//If there isn't a cartID present in the request it creates the shopping cart
+		if cartID == "" {
+			shoppingCart, err = c.Create(ctx)
+			if err != nil {
+				return web.GetResponse(ctx, err.Error(), http.StatusCreated)
+			}
+		}
+
+		log.Info().Msg(MsgItemAdded)
+		return web.GetResponse(ctx, shoppingCart, http.StatusCreated)
 
 	case http.MethodGet:
 		//Retrieves cart for request.PathParameters["cartId"]
-		response = http.StatusOK
 
 	case http.MethodPatch:
-		//Udpdates the quantity for product request.PathParameters["productId"]
+		//Udpdates the quantity for item request.PathParameters["itemId"]
 		//in cartId request.PathParameters["cartId"]
-		response = http.StatusNoContent
 
 	case http.MethodDelete:
-		//Deletes product request.PathParameters["productId"]
+		//Deletes item request.PathParameters["itemId"]
 		//from cartId request.PathParameters["cartId"]
-		response = http.StatusNoContent
 
 	default:
-		return getResponse(http.StatusMethodNotAllowed, "")
+		return web.GetResponse(ctx, "due to be removed", http.StatusForbidden)
 	}
 
-	log.Info().Msg(message)
-
-	return getResponse(response, message)
-}
-
-// getResponse builds an API Gateway Response
-func getResponse(statusCode int, message string) (Response, error) {
-
-	headers := map[string]string{
-		"Content-Type": "application/json",
-	}
-
-	resp := &activateResponse{
-		StatusCode: statusCode,
-		Message:    message,
-	}
-
-	js, err := json.Marshal(resp)
-	if err != nil {
-		return Response{StatusCode: http.StatusInternalServerError}, err
-	}
-
-	log.Debug().Msgf("status_code: %d, message: %s", resp.StatusCode, resp.Message)
-
-	return Response{Headers: headers, Body: string(js),
-		StatusCode: resp.StatusCode}, nil
+	return web.GetResponse(ctx, "due to be removed", http.StatusOK)
 }
 
 func initHandler(ctx context.Context, request events.APIGatewayProxyRequest) (
-	Response, error) {
+	events.APIGatewayProxyResponse, error) {
 
 	//Config holds the configuration for the application
 	var cfg configuration
 	err := config.Load(&cfg)
 	if err != nil {
-		return Response{}, err
+		return events.APIGatewayProxyResponse{}, err
 	}
 
 	log.Debug().Msg("initHandler function")
 
 	sess, err := saws.GetSession(cfg.AWS.Region)
 	if err != nil {
-		return Response{}, err
+		return events.APIGatewayProxyResponse{}, err
 	}
 
 	return Handler(ctx, saws.GetDynamoDB(sess), request, cfg)

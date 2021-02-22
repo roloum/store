@@ -4,11 +4,11 @@ import (
 	"os"
 )
 
-//SetEnvironment sets the Environment variables for the test cacses
+//SetEnvironment sets the Environment variables required to run the test cases
 func SetEnvironment() {
 
 	vars := map[string]string{
-		"AWS_DYNAMODB_TABLE_USER": "User",
+		"AWS_DYNAMODB_TABLE_STORE": "Store",
 	}
 
 	for key, value := range vars {

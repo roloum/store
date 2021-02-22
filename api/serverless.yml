@@ -66,17 +66,19 @@ functions:
       - http:
           path: cart/{cartId}
           method: get
-      # Creates the shopping cart and adds the first product
+      # Creates the shopping cart and adds the first item
       - http:
           path: cart
           method: post
-      # Adds a product to the shopping cart
+      # Adds a item to the shopping cart
       - http:
           path: cart/{cartId}
           method: post
+      # Updates the quantity of an item
       - http:
-          path: cart/{cartId}/items/{productId}
+          path: cart/{cartId}/items/{itemId}
           method: patch
+      # Deletes item from cart
       - http:
-          path: cart/{cartId}/items/{productId}
+          path: cart/{cartId}/items/{itemId}
           method: delete
