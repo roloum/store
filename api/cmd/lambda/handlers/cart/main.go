@@ -58,8 +58,7 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest,
 		return updateItem(ctx, request, ch)
 
 	case http.MethodDelete:
-		//Deletes item request.PathParameters["itemId"]
-		//from cartId request.PathParameters["cartId"]
+		return deleteItem(ctx, request, ch)
 
 	}
 
@@ -129,6 +128,23 @@ func updateItem(ctx context.Context, request events.APIGatewayProxyRequest,
 
 	return web.GetResponse(ctx, shoppingCart, http.StatusCreated)
 
+}
+
+//deleteItem Deletes item request.PathParameters["itemId"]
+//from cartId request.PathParameters["cartId"]
+func deleteItem(ctx context.Context, request events.APIGatewayProxyRequest,
+	ch *cart.Handler) (events.APIGatewayProxyResponse, error) {
+
+	var deleteItem cart.DeleteItemInfo
+	//Add parameters to the updateItem struct
+	deleteItem.CartID = request.PathParameters[PathParamCartID]
+	deleteItem.ItemID = request.PathParameters[PathParamItemID]
+
+	shoppingCart, err := ch.DeleteItem(ctx, &deleteItem)
+	if err != nil {
+		return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
+	}
+	return web.GetResponse(ctx, shoppingCart, http.StatusCreated)
 }
 
 func initHandler(ctx context.Context, request events.APIGatewayProxyRequest) (

@@ -34,6 +34,9 @@ var (
 
 	//ErrCouldNotUpdateItem error returned if we failed to update item's quantity
 	ErrCouldNotUpdateItem = errors.New("CouldNotUpdateItem")
+
+	//ErrCouldNotDeleteItem error returned if we failed to update item's quantity
+	ErrCouldNotDeleteItem = errors.New("CouldNotDeleteItem")
 )
 
 //Handler struct is a handler for executing the actions related to the shopping cart
@@ -172,6 +175,34 @@ func (h *Handler) UpdateItem(ctx context.Context, ui *UpdateItemInfo) (*Cart, er
 
 	log.Info().Msgf("Quantity set to %d for item %s in cart %s", ui.Quantity,
 		ui.ItemID, ui.CartID)
+
+	return &Cart{}, nil
+}
+
+//DeleteItem deletes an item from the shopping cart
+func (h *Handler) DeleteItem(ctx context.Context, di *DeleteItemInfo) (*Cart, error) {
+
+	if err := validate.Struct(di); err != nil {
+		log.Error().Msgf("Error validating struct: %s", err.Error())
+		return nil, getValidationError(err)
+	}
+
+	log.Debug().Msgf("Deleting item %s from cart %s", di.ItemID, di.CartID)
+
+	_, err := h.svc.DeleteItemWithContext(ctx, &dynamodb.DeleteItemInput{
+		Key: map[string]*dynamodb.AttributeValue{
+			"pk": {S: aws.String(getCartPK(di.CartID))},
+			"sk": {S: aws.String(getItemSK(di.ItemID))},
+		},
+		TableName:           aws.String(h.tableName),
+		ConditionExpression: aws.String("attribute_exists(pk) and attribute_exists(sk)"),
+	})
+	if err != nil {
+		log.Error().Msgf("Error adding item: %s", err.Error())
+		return nil, ErrCouldNotDeleteItem
+	}
+
+	log.Info().Msgf("Item %s deleted from cart %s", di.ItemID, di.CartID)
 
 	return &Cart{}, nil
 }
