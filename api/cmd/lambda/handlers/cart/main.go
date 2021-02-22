@@ -32,9 +32,9 @@ var (
 )
 
 // Handler is our lambda handler invoked by the `lambda.Start` function call
-func Handler(ctx context.Context, dynamoDB *dynamodb.DynamoDB,
-	request events.APIGatewayProxyRequest,
-	cfg config.Configuration) (events.APIGatewayProxyResponse, error) {
+func Handler(ctx context.Context, request events.APIGatewayProxyRequest,
+	dynamoDB *dynamodb.DynamoDB, cfg config.Configuration) (
+	events.APIGatewayProxyResponse, error) {
 
 	//Missing parameters? http.StatusBadRequest
 
@@ -49,64 +49,13 @@ func Handler(ctx context.Context, dynamoDB *dynamodb.DynamoDB,
 
 	switch request.HTTPMethod {
 	case http.MethodPost:
-		//Adds a item to the shopping cart request.PathParameters["cart_id"].
-		//If cart_id is not set, it creates the shopping cart first
-
-		var newItem cart.NewItemInfo
-		err := json.Unmarshal([]byte(request.Body), &newItem)
-		if err != nil {
-			log.Error().Msgf("Error unmarshalling JSON: %s", err.Error())
-			return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
-		}
-
-		var shoppingCart *cart.Cart
-
-		//If there isn't a cartID present in the request it creates the shopping cart
-		cartID, ok := request.PathParameters[PathParamCartID]
-		//cartID is not in the Path, new shopping cart
-		if !ok {
-			shoppingCart, err = ch.CreateAndAddItem(ctx, &newItem)
-		} else {
-			//If cart_id is set in the path and body, return error
-			if newItem.CartID != "" {
-				return web.GetResponse(ctx, ErrRequestBodyContainsCartID,
-					http.StatusBadRequest)
-			}
-			//Use cart_id from path
-			newItem.CartID = cartID
-			shoppingCart, err = ch.AddItem(ctx, &newItem)
-		}
-		if err != nil {
-			return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
-		}
-
-		return web.GetResponse(ctx, shoppingCart, http.StatusCreated)
+		return addItem(ctx, request, ch)
 
 	case http.MethodGet:
 		//Retrieves cart for request.PathParameters["cartId"]
 
 	case http.MethodPatch:
-		//Udpdates the quantity for item request.PathParameters["item_id"]
-		//in cartId request.PathParameters["cart_id"]
-
-		//Unmarshal the request body
-		var updateItem cart.UpdateItemInfo
-		err := json.Unmarshal([]byte(request.Body), &updateItem)
-		if err != nil {
-			log.Error().Msgf("Error unmarshalling JSON: %s", err.Error())
-			return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
-		}
-
-		//Add parameters to the updateItem struct
-		updateItem.CartID = request.PathParameters[PathParamCartID]
-		updateItem.ItemID = request.PathParameters[PathParamItemID]
-
-		shoppingCart, err := ch.UpdateItem(ctx, &updateItem)
-		if err != nil {
-			return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
-		}
-
-		return web.GetResponse(ctx, shoppingCart, http.StatusCreated)
+		return updateItem(ctx, request, ch)
 
 	case http.MethodDelete:
 		//Deletes item request.PathParameters["itemId"]
@@ -117,6 +66,68 @@ func Handler(ctx context.Context, dynamoDB *dynamodb.DynamoDB,
 	//APIGateway would not allow the function to get to this point
 	//Since all the supported http methods are in the switch
 	return web.GetResponse(ctx, empty, http.StatusMethodNotAllowed)
+
+}
+
+//addItem Adds a item to the shopping cart request.PathParameters["cart_id"].
+//If cart_id is not set, it creates the shopping cart first
+func addItem(ctx context.Context, request events.APIGatewayProxyRequest,
+	ch *cart.Handler) (events.APIGatewayProxyResponse, error) {
+
+	var newItem cart.NewItemInfo
+	err := json.Unmarshal([]byte(request.Body), &newItem)
+	if err != nil {
+		log.Error().Msgf("Error unmarshalling JSON: %s", err.Error())
+		return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
+	}
+
+	var shoppingCart *cart.Cart
+
+	//If there isn't a cartID present in the request it creates the shopping cart
+	cartID, ok := request.PathParameters[PathParamCartID]
+	//cartID is not in the Path, new shopping cart
+	if !ok {
+		shoppingCart, err = ch.CreateAndAddItem(ctx, &newItem)
+	} else {
+		//If cart_id is set in the path and body, return error
+		if newItem.CartID != "" {
+			return web.GetResponse(ctx, ErrRequestBodyContainsCartID,
+				http.StatusBadRequest)
+		}
+		//Use cart_id from path
+		newItem.CartID = cartID
+		shoppingCart, err = ch.AddItem(ctx, &newItem)
+	}
+	if err != nil {
+		return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
+	}
+
+	return web.GetResponse(ctx, shoppingCart, http.StatusCreated)
+}
+
+//updateItem Udpdates the quantity for item request.PathParameters["item_id"]
+//in cartId request.PathParameters["cart_id"]
+func updateItem(ctx context.Context, request events.APIGatewayProxyRequest,
+	ch *cart.Handler) (events.APIGatewayProxyResponse, error) {
+
+	//Unmarshal the request body
+	var updateItem cart.UpdateItemInfo
+	err := json.Unmarshal([]byte(request.Body), &updateItem)
+	if err != nil {
+		log.Error().Msgf("Error unmarshalling JSON: %s", err.Error())
+		return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
+	}
+
+	//Add parameters to the updateItem struct
+	updateItem.CartID = request.PathParameters[PathParamCartID]
+	updateItem.ItemID = request.PathParameters[PathParamItemID]
+
+	shoppingCart, err := ch.UpdateItem(ctx, &updateItem)
+	if err != nil {
+		return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
+	}
+
+	return web.GetResponse(ctx, shoppingCart, http.StatusCreated)
 
 }
 
@@ -137,7 +148,7 @@ func initHandler(ctx context.Context, request events.APIGatewayProxyRequest) (
 		return events.APIGatewayProxyResponse{}, err
 	}
 
-	return Handler(ctx, saws.GetDynamoDB(sess), request, cfg)
+	return Handler(ctx, request, saws.GetDynamoDB(sess), cfg)
 
 }
 
