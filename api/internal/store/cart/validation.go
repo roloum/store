@@ -39,6 +39,7 @@ func init() {
 	validate = validator.New()
 
 	validate.RegisterValidation("validPrice", isValidPrice)
+	validate.RegisterValidation("validQuantity", isValidQuantity)
 
 }
 

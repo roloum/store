@@ -12,6 +12,8 @@ The following is a list of ideas that, due to initial requirements or time const
 - There is no inventory. The user can add as many products as they want
 - Unavailable products should not be added to shopping carts
 - Rows for shopping carts that were created but are empty, can be expired(deleted)
+- Int overflow of item's Quantity
+- Float overflow of item's price
 
 # API Endpoints
 There are 5 API endpoints:
@@ -29,5 +31,3 @@ Updates the quantity of an item in the shopping cart
 
 - DELETE: cart/{cartId}/items/{itemId}
 Deletes an item from the shopping cart
-
-

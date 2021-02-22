@@ -5,9 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/rs/zerolog/log"
 )
 
 //GetResponse Returns a struct of type events.APIGatewayProxyResponse

@@ -2,9 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
-
-	"github.com/rs/zerolog/log"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -13,59 +12,57 @@ import (
 	"github.com/roloum/store/api/internal/config"
 	"github.com/roloum/store/api/internal/store/cart"
 	"github.com/roloum/store/api/internal/web"
+	"github.com/rs/zerolog/log"
 )
 
-const (
-	//MsgItemAdded message returned item is added to cart
-	MsgItemAdded = "ItemAdded"
-)
-
-//Configuration Struct will be populated from environment variables
-//Using github.com/kelseyhightower/envconfig
-type (
-	configuration struct {
-		AWS struct {
-			DynamoDB struct {
-				Table struct {
-					Store string `required:"true"`
-				}
-			}
-			Region string `required:"true"`
-		}
-	}
-)
+var empty struct{}
 
 // Handler is our lambda handler invoked by the `lambda.Start` function call
 func Handler(ctx context.Context, dynamoDB *dynamodb.DynamoDB,
 	request events.APIGatewayProxyRequest,
-	cfg configuration) (events.APIGatewayProxyResponse, error) {
+	cfg config.Configuration) (events.APIGatewayProxyResponse, error) {
 
 	//Missing parameters? http.StatusBadRequest
 
 	//Instantiate cart API Handler
-	c, err := cart.New(dynamoDB, cfg.AWS.DynamoDB.Table.Store)
+	ch, err := cart.New(dynamoDB, cfg.AWS.DynamoDB.Table.Store)
 	if err != nil {
 		return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
 	}
+
+	log.Debug().Msgf("Executing method %s for path: %s", request.HTTPMethod, request.Path)
 
 	switch request.HTTPMethod {
 	case http.MethodPost:
 		//Adds a item to the shopping cart request.PathParameters["cart_id"].
 		//If cart_id is not set, it creates the shopping cart first
 
-		cartID := request.QueryStringParameters["cart_id"]
+		log.Debug().Msgf("payload: %v", request.Body)
 
-		var shoppingCart *cart.Info
+		var newItem cart.NewItem
+		err := json.Unmarshal([]byte(request.Body), &newItem)
+		if err != nil {
+			log.Error().Msgf("Error unmarshalling JSON: %s", err.Error())
+			return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
+		}
+
+		var shoppingCart *cart.Cart
 
 		//If there isn't a cartID present in the request it creates the shopping cart
-		if cartID == "" {
-			shoppingCart, err = c.Create(ctx)
+		if newItem.CartID == "" {
+			shoppingCart, err = ch.Create(ctx)
 			if err != nil {
-				return web.GetResponse(ctx, err.Error(), http.StatusCreated)
+				return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
 			}
 		}
 
-		log.Info().Msg(MsgItemAdded)
+		newItem.CartID = shoppingCart.CartID
+
+		shoppingCart, err = ch.AddItem(ctx, newItem)
+		if err != nil {
+			return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
+		}
+
 		return web.GetResponse(ctx, shoppingCart, http.StatusCreated)
 
 	case http.MethodGet:
@@ -79,18 +76,19 @@ func Handler(ctx context.Context, dynamoDB *dynamodb.DynamoDB,
 		//Deletes item request.PathParameters["itemId"]
 		//from cartId request.PathParameters["cartId"]
 
-	default:
-		return web.GetResponse(ctx, "due to be removed", http.StatusForbidden)
 	}
 
-	return web.GetResponse(ctx, "due to be removed", http.StatusOK)
+	//APIGateway would not allow the function to get to this point
+	//Since all the supported http methods are in the switch
+	return web.GetResponse(ctx, empty, http.StatusMethodNotAllowed)
+
 }
 
 func initHandler(ctx context.Context, request events.APIGatewayProxyRequest) (
 	events.APIGatewayProxyResponse, error) {
 
 	//Config holds the configuration for the application
-	var cfg configuration
+	var cfg config.Configuration
 	err := config.Load(&cfg)
 	if err != nil {
 		return events.APIGatewayProxyResponse{}, err

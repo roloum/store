@@ -8,6 +8,21 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+//Configuration Struct will be populated from environment variables
+//Using github.com/kelseyhightower/envconfig
+type (
+	Configuration struct {
+		AWS struct {
+			DynamoDB struct {
+				Table struct {
+					Store string `required:"true"`
+				}
+			}
+			Region string `required:"true"`
+		}
+	}
+)
+
 //The init function sets the log level and format, since this is the file where
 //all the configuration is loaded from the environment variables
 func init() {
