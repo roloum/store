@@ -15,7 +15,18 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var empty struct{}
+const (
+	//PathParamCartID parameter name for the cart_id
+	PathParamCartID = "cart_id"
+
+	//ErrRequestBodyContainsCartID error returned when adding item to existing
+	//cart and there is a cart_id in the body
+	ErrRequestBodyContainsCartID = "RequestBodyContainsCartID"
+)
+
+var (
+	empty struct{}
+)
 
 // Handler is our lambda handler invoked by the `lambda.Start` function call
 func Handler(ctx context.Context, dynamoDB *dynamodb.DynamoDB,
@@ -30,16 +41,15 @@ func Handler(ctx context.Context, dynamoDB *dynamodb.DynamoDB,
 		return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
 	}
 
-	log.Debug().Msgf("Executing method %s for path: %s", request.HTTPMethod, request.Path)
+	log.Debug().Msgf("Executing method %s for path: %s with body: %v",
+		request.HTTPMethod, request.Path, request.Body)
 
 	switch request.HTTPMethod {
 	case http.MethodPost:
 		//Adds a item to the shopping cart request.PathParameters["cart_id"].
 		//If cart_id is not set, it creates the shopping cart first
 
-		log.Debug().Msgf("payload: %v", request.Body)
-
-		var newItem cart.NewItem
+		var newItem cart.NewItemInfo
 		err := json.Unmarshal([]byte(request.Body), &newItem)
 		if err != nil {
 			log.Error().Msgf("Error unmarshalling JSON: %s", err.Error())
@@ -49,10 +59,19 @@ func Handler(ctx context.Context, dynamoDB *dynamodb.DynamoDB,
 		var shoppingCart *cart.Cart
 
 		//If there isn't a cartID present in the request it creates the shopping cart
-		if newItem.CartID == "" {
-			shoppingCart, err = ch.CreateAndAddItem(ctx, newItem)
+		cartID, ok := request.PathParameters[PathParamCartID]
+		//cartID is not in the Path, new shopping cart
+		if !ok {
+			shoppingCart, err = ch.CreateAndAddItem(ctx, &newItem)
 		} else {
-			shoppingCart, err = ch.AddItem(ctx, newItem)
+			//If cart_id is set in the path and body, return error
+			if newItem.CartID != "" {
+				return web.GetResponse(ctx, ErrRequestBodyContainsCartID,
+					http.StatusBadRequest)
+			}
+			//Use cart_id from path
+			newItem.CartID = cartID
+			shoppingCart, err = ch.AddItem(ctx, &newItem)
 		}
 		if err != nil {
 			return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)

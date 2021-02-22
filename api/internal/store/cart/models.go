@@ -16,10 +16,10 @@ type Item struct {
 	Quantity    string  `json:"quantity"`
 }
 
-//NewItem contains the information of the new item is being added to the cart
+//NewItemInfo contains the information of the new item is being added to the cart
 //In case cartID is empty, a new shopping cart row is created
 //Along with the item row
-type NewItem struct {
+type NewItemInfo struct {
 	CartID      string  `json:"cart_id" validate:"required"`
 	ItemID      string  `json:"item_id" validate:"required"`
 	Description string  `json:"description" validate:"required"`
@@ -27,9 +27,15 @@ type NewItem struct {
 	Quantity    int     `json:"quantity" validate:"required,validQuantity"`
 }
 
-//UpdateItem receive
-type UpdateItem struct {
+//UpdateItemInfo contains the information to update the quantity of an item in the cart
+type UpdateItemInfo struct {
 	CartID   string `json:"cart_id" validate:"required"`
 	ItemID   string `json:"item_id" validate:"required"`
-	Quantity int    `json:"quantity" validate:"required"`
+	Quantity int    `json:"quantity" validate:"required,validQuantity"`
+}
+
+//DeleteItemInfo contains the information to delete an item from the cart
+type DeleteItemInfo struct {
+	CartID string `json:"cart_id" validate:"required"`
+	ItemID string `json:"item_id" validate:"required"`
 }

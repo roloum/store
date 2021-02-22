@@ -64,7 +64,7 @@ functions:
     events:
       # Retrieves the content of the cart from the database
       - http:
-          path: cart/{cartId}
+          path: cart/{cart_id}
           method: get
       # Creates the shopping cart and adds the first item
       - http:
@@ -72,13 +72,13 @@ functions:
           method: post
       # Adds a item to the shopping cart
       - http:
-          path: cart/{cartId}
+          path: cart/{cart_id}
           method: post
       # Updates the quantity of an item
       - http:
-          path: cart/{cartId}/items/{itemId}
+          path: cart/{cart_id}/items/{item_id}
           method: patch
       # Deletes item from cart
       - http:
-          path: cart/{cartId}/items/{itemId}
+          path: cart/{cart_id}/items/{item_id}
           method: delete

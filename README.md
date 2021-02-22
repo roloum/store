@@ -14,6 +14,7 @@ The following is a list of ideas that, due to initial requirements or time const
 - Rows for shopping carts that were created but are empty, can be expired(deleted)
 - Int overflow of item's Quantity
 - Float overflow of item's price
+- When trying to add an item that already exists in the shopping cart, increment the quantity by 1 instead
 
 # API Endpoints
 There are 5 API endpoints:

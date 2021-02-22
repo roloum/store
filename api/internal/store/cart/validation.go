@@ -23,13 +23,13 @@ const (
 	ErrPriceIsEmpty = "PriceIsEmpty"
 
 	//ErrPriceIsInvalid Error describes when price is not valid number
-	ErrPriceIsInvalid = "PriceIsNotValid"
+	ErrPriceIsInvalid = "PriceIsInvalid"
 
 	//ErrQuantityIsEmpty Error describes when Quantity is empty
 	ErrQuantityIsEmpty = "QuantityIsEmpty"
 
 	//ErrQuantityIsInvalid Error describes when quantity is not a valid number
-	ErrQuantityIsInvalid = "QuantityIsNotValid"
+	ErrQuantityIsInvalid = "QuantityIsInvalid"
 )
 
 var validate *validator.Validate
