@@ -19,6 +19,9 @@ const (
 	//PathParamCartID parameter name for the cart_id
 	PathParamCartID = "cart_id"
 
+	//PathParamItemID parameter name for the cart_id
+	PathParamItemID = "item_id"
+
 	//ErrRequestBodyContainsCartID error returned when adding item to existing
 	//cart and there is a cart_id in the body
 	ErrRequestBodyContainsCartID = "RequestBodyContainsCartID"
@@ -83,8 +86,27 @@ func Handler(ctx context.Context, dynamoDB *dynamodb.DynamoDB,
 		//Retrieves cart for request.PathParameters["cartId"]
 
 	case http.MethodPatch:
-		//Udpdates the quantity for item request.PathParameters["itemId"]
-		//in cartId request.PathParameters["cartId"]
+		//Udpdates the quantity for item request.PathParameters["item_id"]
+		//in cartId request.PathParameters["cart_id"]
+
+		//Unmarshal the request body
+		var updateItem cart.UpdateItemInfo
+		err := json.Unmarshal([]byte(request.Body), &updateItem)
+		if err != nil {
+			log.Error().Msgf("Error unmarshalling JSON: %s", err.Error())
+			return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
+		}
+
+		//Add parameters to the updateItem struct
+		updateItem.CartID = request.PathParameters[PathParamCartID]
+		updateItem.ItemID = request.PathParameters[PathParamItemID]
+
+		shoppingCart, err := ch.UpdateItem(ctx, &updateItem)
+		if err != nil {
+			return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
+		}
+
+		return web.GetResponse(ctx, shoppingCart, http.StatusCreated)
 
 	case http.MethodDelete:
 		//Deletes item request.PathParameters["itemId"]

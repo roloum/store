@@ -14,6 +14,7 @@ type MockDynamoDB struct {
 	dynamodbiface.DynamoDBAPI
 
 	PutItemOutput            *dynamodb.PutItemOutput
+	UpdateItemOutput         *dynamodb.UpdateItemOutput
 	TransactWriteItemsOutput *dynamodb.TransactWriteItemsOutput
 	OutputError              error
 }
@@ -30,4 +31,11 @@ func (m *MockDynamoDB) TransactWriteItemsWithContext(aws.Context,
 	*dynamodb.TransactWriteItemsInput, ...request.Option) (
 	*dynamodb.TransactWriteItemsOutput, error) {
 	return m.TransactWriteItemsOutput, m.OutputError
+}
+
+//UpdateItemWithContext mocks the UpdateItemWithContext method
+func (m *MockDynamoDB) UpdateItemWithContext(aws.Context,
+	*dynamodb.UpdateItemInput, ...request.Option) (*dynamodb.UpdateItemOutput,
+	error) {
+	return m.UpdateItemOutput, m.OutputError
 }

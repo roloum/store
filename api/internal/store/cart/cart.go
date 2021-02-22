@@ -32,8 +32,8 @@ var (
 	//ErrCouldNotAddItem error returned if we failed to create the cart in the database
 	ErrCouldNotAddItem = errors.New("CouldNotAddItem")
 
-	//ErrAddItem error returned if we failed to add item to the cart
-	ErrAddItem = errors.New("CouldNotAddItem")
+	//ErrCouldNotUpdateItem error returned if we failed to update item's quantity
+	ErrCouldNotUpdateItem = errors.New("CouldNotUpdateItem")
 )
 
 //Handler struct is a handler for executing the actions related to the shopping cart
@@ -53,7 +53,8 @@ func New(svc dynamodbiface.DynamoDBAPI, tableName string) (*Handler, error) {
 	return &Handler{svc, tableName}, nil
 }
 
-//CreateAndAddItem Creates a shopping cart and returns a pointer to a struct of type Cart
+//CreateAndAddItem Creates a shopping cart and adds the first item
+//ni contains the information about the new item
 func (h *Handler) CreateAndAddItem(ctx context.Context, ni *NewItemInfo) (*Cart, error) {
 
 	if ni.CartID != "" {
@@ -71,6 +72,9 @@ func (h *Handler) CreateAndAddItem(ctx context.Context, ni *NewItemInfo) (*Cart,
 	if err := validate.Struct(ni); err != nil {
 		return nil, getValidationError(err)
 	}
+
+	log.Debug().Msgf("Creating cart with ID: %s and adding item ID :%s",
+		ni.CartID, ni.ItemID)
 
 	_, err := h.svc.TransactWriteItemsWithContext(ctx, &dynamodb.TransactWriteItemsInput{
 		TransactItems: []*dynamodb.TransactWriteItem{
@@ -107,6 +111,7 @@ func (h *Handler) CreateAndAddItem(ctx context.Context, ni *NewItemInfo) (*Cart,
 }
 
 //AddItem Adds new item to the shopping cart
+//Receives the NewItemInfo with all the information about the new item
 func (h *Handler) AddItem(ctx context.Context, ni *NewItemInfo) (*Cart, error) {
 
 	if err := validate.Struct(ni); err != nil {
@@ -114,7 +119,7 @@ func (h *Handler) AddItem(ctx context.Context, ni *NewItemInfo) (*Cart, error) {
 		return nil, getValidationError(err)
 	}
 
-	log.Info().Msgf("Adding item %s to cart %s", ni.Description, ni.CartID)
+	log.Debug().Msgf("Adding item %s to cart %s", ni.Description, ni.CartID)
 
 	_, err := h.svc.PutItemWithContext(ctx, &dynamodb.PutItemInput{
 		Item:                getNewItemDynamoAttributes(ni),
@@ -131,6 +136,44 @@ func (h *Handler) AddItem(ctx context.Context, ni *NewItemInfo) (*Cart, error) {
 
 	return &Cart{}, nil
 
+}
+
+//UpdateItem Updates the quantity for an item in the shopping cart
+func (h *Handler) UpdateItem(ctx context.Context, ui *UpdateItemInfo) (*Cart, error) {
+
+	if err := validate.Struct(ui); err != nil {
+		log.Error().Msgf("Error validating struct: %s", err.Error())
+		return nil, getValidationError(err)
+	}
+
+	log.Debug().Msgf("Updating quantity: %d for item %s in cart %s", ui.Quantity,
+		ui.ItemID, ui.CartID)
+
+	_, err := h.svc.UpdateItemWithContext(ctx, &dynamodb.UpdateItemInput{
+		ExpressionAttributeNames: map[string]*string{
+			"#Q": aws.String("quantity"),
+		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":q": {N: aws.String(strconv.Itoa(ui.Quantity))},
+		},
+		Key: map[string]*dynamodb.AttributeValue{
+			"pk": {S: aws.String(getCartPK(ui.CartID))},
+			"sk": {S: aws.String(getItemSK(ui.ItemID))},
+		},
+		TableName:           aws.String(h.tableName),
+		UpdateExpression:    aws.String("SET #Q = :q"),
+		ConditionExpression: aws.String("attribute_exists(pk) and attribute_exists(sk)"),
+	})
+
+	if err != nil {
+		log.Error().Msgf("Error adding item: %s", err.Error())
+		return nil, ErrCouldNotUpdateItem
+	}
+
+	log.Info().Msgf("Quantity set to %d for item %s in cart %s", ui.Quantity,
+		ui.ItemID, ui.CartID)
+
+	return &Cart{}, nil
 }
 
 //getNewItemDynamoAttributes Returns an array of attribute values for the
