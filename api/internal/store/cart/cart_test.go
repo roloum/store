@@ -18,10 +18,11 @@ func init() {
 }
 
 //TestCreateCart tests the Create method that creates a new shopping cart
-func TestCreateCart(t *testing.T) {
+func TestCreateAddItem(t *testing.T) {
 
-	cart, _ := New(&test.MockDynamoDB{}, StoreTable)
-	_, err := cart.Create(context.Background())
+	handler, _ := New(&test.MockDynamoDB{}, StoreTable)
+	ni := NewItem{ItemID: "123", Description: "desc", Price: 1, Quantity: 1}
+	_, err := handler.CreateAndAddItem(context.Background(), ni)
 	if err != nil {
 		t.Fatalf("Received error while creating shopping cart: %s", err.Error())
 	}

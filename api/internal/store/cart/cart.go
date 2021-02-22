@@ -46,23 +46,44 @@ func New(svc dynamodbiface.DynamoDBAPI, tableName string) (*Handler, error) {
 	return &Handler{svc, tableName}, nil
 }
 
-//Create Creates a shopping cart and returns a pointer to a struct of type Cart
-func (h *Handler) Create(ctx context.Context) (*Cart, error) {
+//CreateAndAddItem Creates a shopping cart and returns a pointer to a struct of type Cart
+func (h *Handler) CreateAndAddItem(ctx context.Context, ni NewItem) (*Cart, error) {
 
 	//Generate a unique ID for the shopping cart
-	cartID := uuid.New()
-	log.Debug().Msgf("Generated UUID: %s", cartID.String())
+	cartID := uuid.New().String()
+	log.Debug().Msgf("Generated UUID: %s", cartID)
 
-	c := Cart{CartID: cartID.String()}
+	c := Cart{CartID: cartID}
 
-	_, err := h.svc.PutItemWithContext(ctx, &dynamodb.PutItemInput{
-		Item: map[string]*dynamodb.AttributeValue{
-			"pk":     {S: aws.String(getCartPK(c.CartID))},
-			"sk":     {S: aws.String(getCartPK(c.CartID))},
-			"cartId": {S: aws.String(c.CartID)},
+	_, err := h.svc.TransactWriteItemsWithContext(ctx, &dynamodb.TransactWriteItemsInput{
+		TransactItems: []*dynamodb.TransactWriteItem{
+			{
+				Put: &dynamodb.Put{
+					Item: map[string]*dynamodb.AttributeValue{
+						"pk":     {S: aws.String(getCartPK(c.CartID))},
+						"sk":     {S: aws.String(getCartPK(c.CartID))},
+						"cartId": {S: aws.String(c.CartID)},
+					},
+					TableName:           aws.String(h.tableName),
+					ConditionExpression: aws.String("attribute_not_exists(pk) and attribute_not_exists(sk)"),
+				},
+			},
+			{
+				Put: &dynamodb.Put{
+					Item: map[string]*dynamodb.AttributeValue{
+						"pk":          {S: aws.String(getCartPK(c.CartID))},
+						"sk":          {S: aws.String(getItemSK(ni.ItemID))},
+						"cartId":      {S: aws.String(c.CartID)},
+						"itemId":      {S: aws.String(ni.ItemID)},
+						"description": {S: aws.String(ni.Description)},
+						"price":       {N: aws.String(fmt.Sprintf("%f", ni.Price))},
+						"quantity":    {N: aws.String(strconv.Itoa(ni.Quantity))},
+					},
+					TableName:           aws.String(h.tableName),
+					ConditionExpression: aws.String("attribute_not_exists(pk) and attribute_not_exists(sk)"),
+				},
+			},
 		},
-		TableName:           aws.String(h.tableName),
-		ConditionExpression: aws.String("attribute_not_exists(pk) and attribute_not_exists(sk)"),
 	})
 
 	if err != nil {

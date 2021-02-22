@@ -50,15 +50,10 @@ func Handler(ctx context.Context, dynamoDB *dynamodb.DynamoDB,
 
 		//If there isn't a cartID present in the request it creates the shopping cart
 		if newItem.CartID == "" {
-			shoppingCart, err = ch.Create(ctx)
-			if err != nil {
-				return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
-			}
+			shoppingCart, err = ch.CreateAndAddItem(ctx, newItem)
+		} else {
+			shoppingCart, err = ch.AddItem(ctx, newItem)
 		}
-
-		newItem.CartID = shoppingCart.CartID
-
-		shoppingCart, err = ch.AddItem(ctx, newItem)
 		if err != nil {
 			return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
 		}
