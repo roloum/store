@@ -265,10 +265,10 @@ func (h *Handler) Load(ctx context.Context, cartID string) (*Cart, error) {
 		return nil, ErrCouldNotLoadItems
 	}
 
-	c := &Cart{CartID: cartID}
+	c := Cart{CartID: cartID}
 
 	if *result.Count == int64(0) {
-		return c, nil
+		return &c, nil
 	}
 
 	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &c.Items)
@@ -280,7 +280,7 @@ func (h *Handler) Load(ctx context.Context, cartID string) (*Cart, error) {
 
 	log.Debug().Msgf("Cart total: %f", c.Total)
 
-	return c, nil
+	return &c, nil
 }
 
 //getNewItemDynamoAttributes Returns an array of attribute values for the
