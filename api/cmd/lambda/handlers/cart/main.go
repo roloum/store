@@ -25,6 +25,9 @@ const (
 	//ErrRequestBodyContainsCartID error returned when adding item to existing
 	//cart and there is a cart_id in the body
 	ErrRequestBodyContainsCartID = "RequestBodyContainsCartID"
+
+	//ErrMissingRequestParameters error returned when request.Body is empty
+	ErrMissingRequestParameters = "MissingRequestParameters"
 )
 
 var (
@@ -73,6 +76,10 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest,
 func addItem(ctx context.Context, request events.APIGatewayProxyRequest,
 	ch *cart.Handler) (events.APIGatewayProxyResponse, error) {
 
+	if request.Body == "" {
+		return web.GetResponse(ctx, ErrMissingRequestParameters, http.StatusInternalServerError)
+	}
+
 	var newItem cart.NewItemInfo
 	err := json.Unmarshal([]byte(request.Body), &newItem)
 	if err != nil {
@@ -108,6 +115,10 @@ func addItem(ctx context.Context, request events.APIGatewayProxyRequest,
 //in cartId request.PathParameters["cart_id"]
 func updateItem(ctx context.Context, request events.APIGatewayProxyRequest,
 	ch *cart.Handler) (events.APIGatewayProxyResponse, error) {
+
+	if request.Body == "" {
+		return web.GetResponse(ctx, ErrMissingRequestParameters, http.StatusInternalServerError)
+	}
 
 	//Unmarshal the request body
 	var updateItem cart.UpdateItemInfo
