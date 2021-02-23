@@ -32,3 +32,8 @@ Updates the quantity of an item in the shopping cart
 
 - DELETE: cart/{cartId}/items/{itemId}
 Deletes an item from the shopping cart
+
+# Installation
+
+# Seed the database
+aws dynamodb batch-write-item --request-items file://seed/itemsCatalog.json

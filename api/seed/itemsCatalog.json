@@ -1,0 +1,44 @@
+{
+    "Store": [
+      {
+          "PutRequest": {
+              "Item": {
+                  "pk": {"S": "ITEM#83adae8c-adee-4729-974d-452c8c30aa6c"},
+                  "sk": {"S": "ITEM#83adae8c-adee-4729-974d-452c8c30aa6c"},
+                  "description": {"S": "Pen"},
+                  "price": {"N": "0.99"}
+              }
+          }
+      },
+      {
+          "PutRequest": {
+              "Item": {
+                  "pk": {"S": "ITEM#5408ea4e-1674-484a-947c-721e205b7d7f"},
+                  "sk": {"S": "ITEM#5408ea4e-1674-484a-947c-721e205b7d7f"},
+                  "description": {"S": "Book"},
+                  "price": {"N": "10.99"}
+              }
+          }
+      },
+      {
+          "PutRequest": {
+              "Item": {
+                  "pk": {"S": "ITEM#0dbe71c6-8584-43cd-be13-69ddf5651289"},
+                  "sk": {"S": "ITEM#0dbe71c6-8584-43cd-be13-69ddf5651289"},
+                  "description": {"S": "Water bottle"},
+                  "price": {"N": "4"}
+              }
+          }
+      },
+      {
+          "PutRequest": {
+              "Item": {
+                  "pk": {"S": "ITEM#9008e368-b2e0-4fe6-a677-33148a4af036"},
+                  "sk": {"S": "ITEM#9008e368-b2e0-4fe6-a677-33148a4af036"},
+                  "description": {"S": "Headphones"},
+                  "price": {"N": "17.99"}
+              }
+          }
+      }
+    ]
+}
