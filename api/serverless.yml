@@ -1,7 +1,4 @@
 service: store
-# app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
 
 frameworkVersion: '2'
 
@@ -61,6 +58,13 @@ package:
     - ./bin/**
 
 functions:
+  items:
+    handler: bin/item
+    events:
+      # Returns a list with the information of all items
+      - http:
+          path: items
+          method: get
   cart:
     handler: bin/cart
     events:
@@ -78,9 +82,9 @@ functions:
           method: post
       # Updates the quantity of an item
       - http:
-          path: cart/{cart_id}/item/{item_id}
+          path: cart/{cart_id}/items/{item_id}
           method: patch
       # Deletes item from cart
       - http:
-          path: cart/{cart_id}/item/{item_id}
+          path: cart/{cart_id}/items/{item_id}
           method: delete

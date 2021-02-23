@@ -23,6 +23,9 @@ const (
 )
 
 var (
+	//ErrStoreTableNameIsEmpty Error describes when DynamoDB table name is empty
+	ErrStoreTableNameIsEmpty = "StoreTableNameIsEmpty"
+
 	//ErrCreateCartWithExistingCartID error returned when attempting to create
 	//A shopping cart while sending a cartID in the newItem struct
 	ErrCreateCartWithExistingCartID = errors.New("CreateCartWithExistingCartID")
@@ -277,8 +280,6 @@ func (h *Handler) Load(ctx context.Context, cartID string) (*Cart, error) {
 		return nil, ErrCouldNotLoadCart
 	}
 	c.calculateTotal()
-
-	log.Debug().Msgf("Cart total: %f", c.Total)
 
 	return &c, nil
 }

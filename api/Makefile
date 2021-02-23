@@ -11,3 +11,4 @@ test:
 build:
 	export GO111MODULE=on
 	${BUILD_CMD} bin/cart cmd/lambda/handlers/cart/main.go
+	${BUILD_CMD} bin/item cmd/lambda/handlers/item/main.go

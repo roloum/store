@@ -19,7 +19,7 @@ const (
 	//PathParamCartID parameter name for the cart_id
 	PathParamCartID = "cart_id"
 
-	//PathParamItemID parameter name for the cart_id
+	//PathParamItemID parameter name for the item_id
 	PathParamItemID = "item_id"
 
 	//ErrRequestBodyContainsCartID error returned when adding item to existing
@@ -28,10 +28,6 @@ const (
 
 	//ErrMissingRequestParameters error returned when request.Body is empty
 	ErrMissingRequestParameters = "MissingRequestParameters"
-)
-
-var (
-	empty struct{}
 )
 
 // Handler is our lambda handler invoked by the `lambda.Start` function call
@@ -67,7 +63,7 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest,
 
 	//APIGateway would not allow the function to get to this point
 	//Since all the supported http methods are in the switch
-	return web.GetResponse(ctx, empty, http.StatusMethodNotAllowed)
+	return web.GetResponse(ctx, struct{}{}, http.StatusMethodNotAllowed)
 
 }
 
@@ -183,8 +179,6 @@ func initHandler(ctx context.Context, request events.APIGatewayProxyRequest) (
 	if err != nil {
 		return events.APIGatewayProxyResponse{}, err
 	}
-
-	log.Debug().Msg("initHandler function")
 
 	sess, err := saws.GetSession(cfg.AWS.Region)
 	if err != nil {

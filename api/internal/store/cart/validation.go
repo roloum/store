@@ -7,9 +7,6 @@ import (
 )
 
 const (
-	//ErrStoreTableNameIsEmpty Error describes when DynamoDB table name is empty
-	ErrStoreTableNameIsEmpty = "StoreTableNameIsEmpty"
-
 	//ErrCartIDIsEmpty Error describes when cartID is empty
 	ErrCartIDIsEmpty = "CartIDIsEmpty"
 
