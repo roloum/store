@@ -4,6 +4,7 @@ package cart
 type Cart struct {
 	CartID string  `json:"cart_id"`
 	Total  float32 `json:"total"`
+	Count  int     `json:"count"`
 	Items  []Item  `json:"items"`
 }
 
@@ -11,6 +12,7 @@ type Cart struct {
 func (c *Cart) calculateTotal() {
 	for _, item := range c.Items {
 		c.Total += item.Price * float32(item.Quantity)
+		c.Count += item.Quantity
 	}
 }
 
