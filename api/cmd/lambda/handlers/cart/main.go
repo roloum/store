@@ -77,7 +77,7 @@ func addItem(ctx context.Context, request events.APIGatewayProxyRequest,
 	ch *cart.Handler) (events.APIGatewayProxyResponse, error) {
 
 	if request.Body == "" {
-		return web.GetResponse(ctx, ErrMissingRequestParameters, http.StatusInternalServerError)
+		return web.GetResponse(ctx, ErrMissingRequestParameters, http.StatusBadRequest)
 	}
 
 	var newItem cart.NewItemInfo
@@ -117,7 +117,7 @@ func updateItem(ctx context.Context, request events.APIGatewayProxyRequest,
 	ch *cart.Handler) (events.APIGatewayProxyResponse, error) {
 
 	if request.Body == "" {
-		return web.GetResponse(ctx, ErrMissingRequestParameters, http.StatusInternalServerError)
+		return web.GetResponse(ctx, ErrMissingRequestParameters, http.StatusBadRequest)
 	}
 
 	//Unmarshal the request body
