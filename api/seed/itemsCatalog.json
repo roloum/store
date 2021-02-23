@@ -43,6 +43,28 @@
                   "price": {"N": "17.99"}
               }
           }
+      },
+      {
+          "PutRequest": {
+              "Item": {
+                  "pk": {"S": "ITEM#"},
+                  "sk": {"S": "ITEM#609544d0-1d17-4739-8056-9432bfd197bc"},
+                  "item_id": {"S": "609544d0-1d17-4739-8056-9432bfd197bc"},
+                  "description": {"S": "Umbrella"},
+                  "price": {"N": "7.29"}
+              }
+          }
+      },
+      {
+          "PutRequest": {
+              "Item": {
+                  "pk": {"S": "ITEM#"},
+                  "sk": {"S": "ITEM#b448e2a1-abd0-4a92-80e3-523fc0929487"},
+                  "item_id": {"S": "b448e2a1-abd0-4a92-80e3-523fc0929487"},
+                  "description": {"S": "Jacket"},
+                  "price": {"N": "59.99"}
+              }
+          }
       }
     ]
 }
