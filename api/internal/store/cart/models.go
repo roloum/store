@@ -2,10 +2,16 @@ package cart
 
 //Cart contains the information about the shopping cart and all its Items
 type Cart struct {
-	//CartID is the ID of the cart in the database
-	CartID string `json:"cart_id"`
-	//Collection of items
-	Items []Item `json:"items"`
+	CartID string  `json:"cart_id"`
+	Total  float32 `json:"total"`
+	Items  []Item  `json:"items"`
+}
+
+//calculateTotal calculates the total of the shopping cart
+func (c *Cart) calculateTotal() {
+	for _, item := range c.Items {
+		c.Total += item.Price * float32(item.Quantity)
+	}
 }
 
 //Item contains the information of an item stored in the shopping cart
@@ -13,7 +19,7 @@ type Item struct {
 	ItemID      string  `json:"item_id"`
 	Description string  `json:"description"`
 	Price       float32 `json:"price"`
-	Quantity    string  `json:"quantity"`
+	Quantity    int     `json:"quantity"`
 }
 
 //NewItemInfo contains the information of the new item is being added to the cart

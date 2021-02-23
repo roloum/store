@@ -16,6 +16,7 @@ type MockDynamoDB struct {
 	PutItemOutput            *dynamodb.PutItemOutput
 	UpdateItemOutput         *dynamodb.UpdateItemOutput
 	TransactWriteItemsOutput *dynamodb.TransactWriteItemsOutput
+	QueryOutput              *dynamodb.QueryOutput
 	OutputError              error
 }
 
@@ -38,4 +39,10 @@ func (m *MockDynamoDB) UpdateItemWithContext(aws.Context,
 	*dynamodb.UpdateItemInput, ...request.Option) (*dynamodb.UpdateItemOutput,
 	error) {
 	return m.UpdateItemOutput, m.OutputError
+}
+
+//QueryWithContext mocks the QueryWithContext method
+func (m *MockDynamoDB) QueryWithContext(aws.Context, *dynamodb.QueryInput,
+	...request.Option) (*dynamodb.QueryOutput, error) {
+	return &dynamodb.QueryOutput{Count: aws.Int64(0)}, m.OutputError
 }

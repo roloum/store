@@ -26,6 +26,8 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
         - dynamodb:GetItem
+        - dynamodb:Query
+        - dynamodb:ConditionCheckItem
       Resource:
         - Fn::GetAtt: [storeTable, Arn]
 
@@ -76,9 +78,9 @@ functions:
           method: post
       # Updates the quantity of an item
       - http:
-          path: cart/{cart_id}/items/{item_id}
+          path: cart/{cart_id}/item/{item_id}
           method: patch
       # Deletes item from cart
       - http:
-          path: cart/{cart_id}/items/{item_id}
+          path: cart/{cart_id}/item/{item_id}
           method: delete

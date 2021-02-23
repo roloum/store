@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
@@ -15,10 +16,10 @@ import (
 
 const (
 	//DynamoDBPrefixCart Prexix for the shopping key
-	DynamoDBPrefixCart = "CART"
+	DynamoDBPrefixCart = "CART#"
 
 	//DynamoDBPrefixItem Prexix for product item key
-	DynamoDBPrefixItem = "ITEM"
+	DynamoDBPrefixItem = "ITEM#"
 )
 
 var (
@@ -37,6 +38,12 @@ var (
 
 	//ErrCouldNotDeleteItem error returned if we failed to update item's quantity
 	ErrCouldNotDeleteItem = errors.New("CouldNotDeleteItem")
+
+	//ErrCouldNotLoadItems error returned if we failed to load the cart
+	ErrCouldNotLoadItems = errors.New("CouldNotLoadItems")
+
+	//ErrCouldNotLoadCart error returned if we failed to load the cart
+	ErrCouldNotLoadCart = errors.New("CouldNotLoadCart")
 )
 
 //Handler struct is a handler for executing the actions related to the shopping cart
@@ -84,9 +91,9 @@ func (h *Handler) CreateAndAddItem(ctx context.Context, ni *NewItemInfo) (*Cart,
 			{
 				Put: &dynamodb.Put{
 					Item: map[string]*dynamodb.AttributeValue{
-						"pk":     {S: aws.String(getCartPK(ni.CartID))},
-						"sk":     {S: aws.String(getCartPK(ni.CartID))},
-						"cartId": {S: aws.String(ni.CartID)},
+						"pk":      {S: aws.String(getCartPK(ni.CartID))},
+						"sk":      {S: aws.String(getCartPK(ni.CartID))},
+						"cart_id": {S: aws.String(ni.CartID)},
 					},
 					TableName:           aws.String(h.tableName),
 					ConditionExpression: aws.String("attribute_not_exists(pk) and attribute_not_exists(sk)"),
@@ -107,14 +114,14 @@ func (h *Handler) CreateAndAddItem(ctx context.Context, ni *NewItemInfo) (*Cart,
 		return nil, ErrCreateCart
 	}
 
-	c := &Cart{CartID: ni.CartID}
-	log.Info().Msgf("Cart created with ID: %s", c.CartID)
+	log.Info().Msgf("Cart created with ID: %s", ni.CartID)
 
-	return c, nil
+	return h.Load(ctx, ni.CartID)
 }
 
 //AddItem Adds new item to the shopping cart
 //Receives the NewItemInfo with all the information about the new item
+//We only add the item if the shopping cart exists
 func (h *Handler) AddItem(ctx context.Context, ni *NewItemInfo) (*Cart, error) {
 
 	if err := validate.Struct(ni); err != nil {
@@ -124,10 +131,26 @@ func (h *Handler) AddItem(ctx context.Context, ni *NewItemInfo) (*Cart, error) {
 
 	log.Debug().Msgf("Adding item %s to cart %s", ni.Description, ni.CartID)
 
-	_, err := h.svc.PutItemWithContext(ctx, &dynamodb.PutItemInput{
-		Item:                getNewItemDynamoAttributes(ni),
-		TableName:           aws.String(h.tableName),
-		ConditionExpression: aws.String("attribute_not_exists(pk) and attribute_not_exists(sk)"),
+	_, err := h.svc.TransactWriteItemsWithContext(ctx, &dynamodb.TransactWriteItemsInput{
+		TransactItems: []*dynamodb.TransactWriteItem{
+			{
+				ConditionCheck: &dynamodb.ConditionCheck{
+					Key: map[string]*dynamodb.AttributeValue{
+						"pk": {S: aws.String(getCartPK(ni.CartID))},
+						"sk": {S: aws.String(getCartPK(ni.CartID))},
+					},
+					TableName:           aws.String(h.tableName),
+					ConditionExpression: aws.String("attribute_exists(pk) and attribute_exists(sk)"),
+				},
+			},
+			{
+				Put: &dynamodb.Put{
+					Item:                getNewItemDynamoAttributes(ni),
+					TableName:           aws.String(h.tableName),
+					ConditionExpression: aws.String("attribute_not_exists(pk) and attribute_not_exists(sk)"),
+				},
+			},
+		},
 	})
 
 	if err != nil {
@@ -137,7 +160,7 @@ func (h *Handler) AddItem(ctx context.Context, ni *NewItemInfo) (*Cart, error) {
 
 	log.Info().Msgf("Item %s added to cart %s", ni.ItemID, ni.CartID)
 
-	return &Cart{}, nil
+	return h.Load(ctx, ni.CartID)
 
 }
 
@@ -169,14 +192,14 @@ func (h *Handler) UpdateItem(ctx context.Context, ui *UpdateItemInfo) (*Cart, er
 	})
 
 	if err != nil {
-		log.Error().Msgf("Error adding item: %s", err.Error())
+		log.Error().Msgf("Error updating item: %s", err.Error())
 		return nil, ErrCouldNotUpdateItem
 	}
 
 	log.Info().Msgf("Quantity set to %d for item %s in cart %s", ui.Quantity,
 		ui.ItemID, ui.CartID)
 
-	return &Cart{}, nil
+	return h.Load(ctx, ui.CartID)
 }
 
 //DeleteItem deletes an item from the shopping cart
@@ -194,17 +217,70 @@ func (h *Handler) DeleteItem(ctx context.Context, di *DeleteItemInfo) (*Cart, er
 			"pk": {S: aws.String(getCartPK(di.CartID))},
 			"sk": {S: aws.String(getItemSK(di.ItemID))},
 		},
-		TableName:           aws.String(h.tableName),
 		ConditionExpression: aws.String("attribute_exists(pk) and attribute_exists(sk)"),
+		TableName:           aws.String(h.tableName),
 	})
 	if err != nil {
-		log.Error().Msgf("Error adding item: %s", err.Error())
+		log.Error().Msgf("Error deleting item: %s", err.Error())
 		return nil, ErrCouldNotDeleteItem
 	}
 
 	log.Info().Msgf("Item %s deleted from cart %s", di.ItemID, di.CartID)
 
-	return &Cart{}, nil
+	return h.Load(ctx, di.CartID)
+}
+
+//Load Loads the shopping cart
+func (h *Handler) Load(ctx context.Context, cartID string) (*Cart, error) {
+
+	if cartID == "" {
+		return nil, errors.New(ErrCartIDIsEmpty)
+	}
+
+	log.Debug().Msgf("Loading shopping cart %s", cartID)
+
+	result, err := h.svc.QueryWithContext(ctx, &dynamodb.QueryInput{
+		KeyConditions: map[string]*dynamodb.Condition{
+			"pk": {
+				ComparisonOperator: aws.String("EQ"),
+				AttributeValueList: []*dynamodb.AttributeValue{
+					{S: aws.String(getCartPK(cartID))},
+				},
+			},
+			"sk": {
+				ComparisonOperator: aws.String("BEGINS_WITH"),
+				AttributeValueList: []*dynamodb.AttributeValue{
+					{
+						S: aws.String(DynamoDBPrefixItem),
+					},
+				},
+			},
+		},
+		ProjectionExpression: aws.String("item_id,description,price,quantity"),
+		TableName:            aws.String(h.tableName),
+	})
+
+	if err != nil {
+		log.Error().Msgf("Error loading cart: %s", err.Error())
+		return nil, ErrCouldNotLoadItems
+	}
+
+	c := &Cart{CartID: cartID}
+
+	if *result.Count == int64(0) {
+		return c, nil
+	}
+
+	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &c.Items)
+	if err != nil {
+		log.Error().Msgf("Error loading cart: %s", err.Error())
+		return nil, ErrCouldNotLoadCart
+	}
+	c.calculateTotal()
+
+	log.Debug().Msgf("Cart total: %f", c.Total)
+
+	return c, nil
 }
 
 //getNewItemDynamoAttributes Returns an array of attribute values for the
@@ -213,8 +289,8 @@ func getNewItemDynamoAttributes(ni *NewItemInfo) map[string]*dynamodb.AttributeV
 	return map[string]*dynamodb.AttributeValue{
 		"pk":          {S: aws.String(getCartPK(ni.CartID))},
 		"sk":          {S: aws.String(getItemSK(ni.ItemID))},
-		"cartId":      {S: aws.String(ni.CartID)},
-		"itemId":      {S: aws.String(ni.ItemID)},
+		"cart_id":     {S: aws.String(ni.CartID)},
+		"item_id":     {S: aws.String(ni.ItemID)},
 		"description": {S: aws.String(ni.Description)},
 		"price":       {N: aws.String(fmt.Sprintf("%f", ni.Price))},
 		"quantity":    {N: aws.String(strconv.Itoa(ni.Quantity))},
@@ -224,10 +300,10 @@ func getNewItemDynamoAttributes(ni *NewItemInfo) map[string]*dynamodb.AttributeV
 //getCartPK returns the shopping cartID formatted for the primary key column
 //in the database
 func getCartPK(cartID string) string {
-	return fmt.Sprintf("%s#%s", DynamoDBPrefixCart, cartID)
+	return fmt.Sprintf("%s%s", DynamoDBPrefixCart, cartID)
 }
 
 //getItemSK returns the itemID formatted for the sort key column in the database
 func getItemSK(itemID string) string {
-	return fmt.Sprintf("%s#%s", DynamoDBPrefixItem, itemID)
+	return fmt.Sprintf("%s%s", DynamoDBPrefixItem, itemID)
 }

@@ -45,10 +45,8 @@ func TestCreateAddItem(t *testing.T) {
 			err: ErrCreateCartWithExistingCartID,
 		},
 	}
-
 	tests = append(tests, getSuccessAddItem())
 	tests = append(tests, getAddItemTestCases()...)
-
 	for _, tc := range tests {
 		t.Run(tc.desc, func(t *testing.T) {
 			_, err := handler.CreateAndAddItem(context.Background(), tc.item)
@@ -62,7 +60,6 @@ func TestCreateAddItem(t *testing.T) {
 
 //TestAddItem tests the AddItem to an existing shopping cart
 func TestAddItem(t *testing.T) {
-
 	handler, _ := New(&test.MockDynamoDB{}, StoreTable)
 
 	//Test AddItem without cartID
@@ -104,7 +101,6 @@ func TestAddItem(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 //getSuccessCartItem returns a successful test case that creates a shopping cart

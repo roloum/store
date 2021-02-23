@@ -52,7 +52,7 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest,
 		return addItem(ctx, request, ch)
 
 	case http.MethodGet:
-		//Retrieves cart for request.PathParameters["cartId"]
+		return getCart(ctx, request, ch)
 
 	case http.MethodPatch:
 		return updateItem(ctx, request, ch)
@@ -147,6 +147,22 @@ func deleteItem(ctx context.Context, request events.APIGatewayProxyRequest,
 	return web.GetResponse(ctx, shoppingCart, http.StatusCreated)
 }
 
+//getCart Returns the information of the shopping cart. The shopping cart id
+//is in the path parameters
+func getCart(ctx context.Context, request events.APIGatewayProxyRequest,
+	ch *cart.Handler) (events.APIGatewayProxyResponse, error) {
+
+	shoppingCart, err := ch.Load(ctx, request.PathParameters[PathParamCartID])
+	if err != nil {
+		return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
+	}
+
+	return web.GetResponse(ctx, shoppingCart, http.StatusCreated)
+}
+
+//initHandler is the function invoked by lambda that sets up the Configuration
+//for the real Handler. This allows for the implementation of test cases
+//for the Handler function
 func initHandler(ctx context.Context, request events.APIGatewayProxyRequest) (
 	events.APIGatewayProxyResponse, error) {
 
