@@ -133,7 +133,7 @@ func updateItem(ctx context.Context, request events.APIGatewayProxyRequest,
 		return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
 	}
 
-	return web.GetResponse(ctx, shoppingCart, http.StatusCreated)
+	return web.GetResponse(ctx, shoppingCart, http.StatusOK)
 
 }
 
@@ -151,7 +151,7 @@ func deleteItem(ctx context.Context, request events.APIGatewayProxyRequest,
 	if err != nil {
 		return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
 	}
-	return web.GetResponse(ctx, shoppingCart, http.StatusCreated)
+	return web.GetResponse(ctx, shoppingCart, http.StatusOK)
 }
 
 //getCart Returns the information of the shopping cart. The shopping cart id
@@ -164,7 +164,7 @@ func getCart(ctx context.Context, request events.APIGatewayProxyRequest,
 		return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
 	}
 
-	return web.GetResponse(ctx, shoppingCart, http.StatusCreated)
+	return web.GetResponse(ctx, shoppingCart, http.StatusOK)
 }
 
 //initHandler is the function invoked by lambda that sets up the Configuration
