@@ -5,9 +5,13 @@ class ItemsList extends React.Component {
   constructor(props) {
     super(props);
 
-    this.handleAddClick = this.handleAddClick.bind(this);
+    //bind button to App.jss so we can display the cart
+    this.handleAddClick = this.handleAddClick.bind(props.parent);
+
+    this.handleBackClick = this.handleBackClick.bind(props.parent);
 
     this.addOnClick = props.addOnClick;
+    this.backOnClick = props.backOnClick;
 
     this.state = {
       items: null
@@ -16,6 +20,11 @@ class ItemsList extends React.Component {
 
   handleAddClick(item) {
     this.addOnClick(item)
+  }
+
+  handleBackClick() {
+    console.log("handleBackClick on list.js")
+    this.backOnClick()
   }
 
   componentDidMount() {
@@ -82,10 +91,32 @@ class ItemsList extends React.Component {
             })}
           </ul>
         </div>
+        <div>
+          <BackButton onclick={() => this.handleBackClick()}/>
+        </div>
       </div>
     );
   }
 }
+
+
+
+class BackButton extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.onClick = props.onClick
+  }
+
+  render () {
+    return (
+      <button onClick={this.onClick}>
+        Back
+      </button>
+    );
+  }
+}
+
 
 class AddButton extends React.Component {
 

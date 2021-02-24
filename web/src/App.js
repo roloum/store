@@ -11,11 +11,21 @@ class App extends React.Component {
     super(props)
 
     this.state = {
-      showCart: false,
+      showCart: true,
       cartId: null,
-      cart: null,
+      cart: null
     };
 
+  }
+
+  addItemOnClick () {
+    console.log("add item on click app.js hide cart")
+    this.setState({showCart: false})
+  }
+
+  backOnClick () {
+    console.log("back on click app.js show cart")
+    this.setState({showCart: true})
   }
 
   addOnClick (item) {
@@ -52,6 +62,9 @@ class App extends React.Component {
     .then( (result) => {
       console.log("logging result")
       console.log(result)
+      console.log("show cart true")
+      this.setState({showCart: true, cart: result})
+      //this.forceUpdate()
     })
     .catch(e => {
       //Display error message
@@ -62,13 +75,25 @@ class App extends React.Component {
   }
 
   render() {
+
     const showCart = this.state.showCart;
     let section;
 
     if (showCart) {
-      section = <Cart />;
+      let props = {
+        addItemOnClick: this.addItemOnClick,
+        parent: this
+      }
+      section = <Cart {...props}/>;
     } else {
-      section = <ItemsList addOnClick={this.addOnClick}/>;
+
+      let props = {
+        addOnClick: this.addOnClick,
+        backOnClick: this.backOnClick,
+        cartId: this.cartId,
+        parent: this
+      }
+      section = <ItemsList {...props}/>;
     }
 
     return (

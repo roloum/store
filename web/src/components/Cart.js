@@ -3,16 +3,28 @@ import React from 'react';
 class Cart extends React.Component {
 
   constructor (props) {
-    super (props);
+    super (props)
+
+    //bind button to App.js so we can display the list of items
+    this.handleAddItemClick = this.handleAddItemClick.bind(props.parent);
+
+    this.addItemOnClick = props.addItemOnClick;
 
     this.state = {
-      cart: null
+      cart: props.cart
     }
+  }
+
+  handleAddItemClick () {
+
+    this.addItemOnClick()
+
   }
 
   render() {
     return (
       <div>
+        <AddItemButton onClick={() => this.handleAddItemClick()}/>
       </div>
     )
   }
@@ -28,7 +40,7 @@ class AddItemButton extends React.Component {
   render () {
     return (
       <button onClick={this.onClick}>
-        Add
+        Add Items
       </button>
     );
   }
