@@ -35,8 +35,6 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest,
 	dynamoDB *dynamodb.DynamoDB, cfg config.Configuration) (
 	events.APIGatewayProxyResponse, error) {
 
-	//Missing parameters? http.StatusBadRequest
-
 	//Instantiate cart API Handler
 	ch, err := cart.New(dynamoDB, cfg.AWS.DynamoDB.Table.Store)
 	if err != nil {
