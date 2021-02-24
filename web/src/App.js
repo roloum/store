@@ -82,6 +82,7 @@ class App extends React.Component {
     if (showCart) {
       let props = {
         addItemOnClick: this.addItemOnClick,
+        cart: this.state.cart,
         parent: this
       }
       section = <Cart {...props}/>;
@@ -90,7 +91,7 @@ class App extends React.Component {
       let props = {
         addOnClick: this.addOnClick,
         backOnClick: this.backOnClick,
-        cartId: this.cartId,
+        cartId: this.state.cartId,
         parent: this
       }
       section = <ItemsList {...props}/>;
