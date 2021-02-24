@@ -1,0 +1,66 @@
+.App {
+  border-style: solid;
+  border-width: 1px;
+  border-color: red;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 40%;
+}
+
+.center {
+  margin: auto;
+  width: 50%;
+  border: 3px solid green;
+  padding: 10px;
+}
+
+.Header {
+  width: 100%;
+  border-style: solid;
+  border-width: 1px;
+  border-color: green;
+  font-size:
+}
+
+.HeaderTitle {
+  width: 80%;
+  border-style: solid;
+  border-width: 1px;
+  border-color: blue;
+  float: left;
+}
+
+.CartItemsCount {
+  width: 19%;
+  border-style: solid;
+  border-width: 1px;
+  border-color: yellow;
+  float: right;
+  margin: auto;
+}
+
+.ItemsUL {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ItemListDesc {
+  width: 70%;
+  float:left;
+}
+.ItemListPrice {
+  width: 20%;
+}
+.ItemListBtn {
+  width: 9%;
+  float: right;
+}
+.ItemListRow {
+  border-style: solid;
+  border-width: 1px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
