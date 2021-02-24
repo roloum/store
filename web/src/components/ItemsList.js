@@ -7,7 +7,7 @@ class ItemsList extends React.Component {
 
     this.handleAddClick = this.handleAddClick.bind(this);
 
-    this.addItemOnClick = props.addItemOnClick
+    this.addOnClick = props.addOnClick;
 
     this.state = {
       items: null
@@ -15,7 +15,7 @@ class ItemsList extends React.Component {
   }
 
   handleAddClick(item) {
-    this.addItemOnClick(item)
+    this.addOnClick(item)
   }
 
   componentDidMount() {

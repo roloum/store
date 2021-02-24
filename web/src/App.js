@@ -17,7 +17,8 @@ class App extends React.Component {
     };
 
   }
-  addItemOnClick (item) {
+
+  addOnClick (item) {
 
     const data = {
       "item_id": item.item_id,
@@ -67,7 +68,7 @@ class App extends React.Component {
     if (showCart) {
       section = <Cart />;
     } else {
-      section = <ItemsList addItemOnClick={this.addItemOnClick}/>;
+      section = <ItemsList addOnClick={this.addOnClick}/>;
     }
 
     return (
