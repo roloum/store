@@ -22,7 +22,63 @@ class ItemsList extends React.Component {
   }
 
   handleAddClick(item) {
-    this.addOnClick(item)
+
+    const data = {
+      "item_id": item.item_id,
+      "description": item.description,
+      "quantity": 1,
+      "price": item.price
+    }
+
+    console.log("Adding item from App: ", data)
+
+    let url = "https://zqpjajqli1.execute-api.us-west-2.amazonaws.com/dev/cart"
+    if (this.state.cartId !== null) {
+      url += "/"+this.state.cartId
+    }
+
+    console.log(url)
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+        // 'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: JSON.stringify(data) // body data type must match "Content-Type" header
+      })
+    .then( (response) => {
+
+      if (!response.status === 201 ||
+          !response.headers.get("Content-Type") === "application/json") {
+          throw new TypeError(`Error adding item: `+ data.description);
+      }
+
+      return response.json()
+
+    })
+    .then( (result) => {
+      console.log("logging result")
+      console.log(result)
+      console.log("show cart true")
+
+      this.addOnClick(result)
+
+      
+      //this.forceUpdate()
+    })
+    .catch(e => {
+      //Display error message
+      console.log("Error: ", e)
+      return
+    });
+
+
+
+
+
+
+
   }
 
   handleBackClick() {

@@ -1,7 +1,6 @@
 import React from 'react';
 
 import './App.css'
-import Header from './components/Header';
 import Cart from './components/Cart';
 import ItemsList from './components/ItemsList';
 
@@ -13,7 +12,9 @@ class App extends React.Component {
     this.state = {
       showCart: true,
       cartId: null,
-      cart: null
+      cart: null,
+      subtotal: 0,
+      itemCount: 0
     };
 
   }
@@ -28,55 +29,15 @@ class App extends React.Component {
     this.setState({showCart: true})
   }
 
-  addOnClick (item) {
+  addOnClick (cart) {
 
-    const data = {
-      "item_id": item.item_id,
-      "description": item.description,
-      "quantity": 1,
-      "price": item.price
-    }
-
-    console.log("Adding item from App: ", data)
-
-    let url = "https://zqpjajqli1.execute-api.us-west-2.amazonaws.com/dev/cart"
-    if (this.state.cartId !== null) {
-      url += "/"+this.state.cartId
-    }
-
-    console.log(url)
-
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-        // 'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: JSON.stringify(data) // body data type must match "Content-Type" header
-      })
-    .then( (response) => {
-
-      if (!response.status === 201 ||
-          !response.headers.get("Content-Type") === "application/json") {
-          throw new TypeError(`Error adding item: `+ data.description);
-      }
-
-      return response.json()
-
+    this.setState({
+      showCart: true,
+      cart: cart,
+      cartId: cart.cart_id,
+      subtotal: cart.total,
+      itemCount: cart.count
     })
-    .then( (result) => {
-      console.log("logging result")
-      console.log(result)
-      console.log("show cart true")
-      this.setState({showCart: true, cart: result, cartId: result.cart_id})
-      //this.forceUpdate()
-    })
-    .catch(e => {
-      //Display error message
-      console.log("Error: ", e)
-      return
-    });
-
   }
 
   render() {
@@ -104,7 +65,23 @@ class App extends React.Component {
 
     return (
       <div className="App">
-        <Header />
+
+
+        <div className="Header">
+          <div className="HeaderTitle">
+            <h1>Shopping Cart</h1>
+          </div>
+          <div className="CartItemsCount">
+          <div>
+            <b>Count: {this.state.itemCount}</b>
+          </div>
+          <div>
+            <b>Subtotal: ${this.state.subtotal}</b>
+          </div>
+          </div>
+        </div>
+
+
         {section}
       </div>
     );
