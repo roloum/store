@@ -5,13 +5,24 @@ class ItemsList extends React.Component {
   constructor(props) {
     super(props);
 
+    this.handleAddClick = this.handleAddClick.bind(this);
+
+    this.addItemOnClick = props.addItemOnClick
+
     this.state = {
       items: null
     };
   }
 
-  componentDidMount() {
+  handleAddClick(itemId) {
+    console.log("From ItemsList.js itemId:", itemId)
+    this.addItemOnClick(itemId)
+    console.log("after addItemOnClick():", itemId)
+    //this.setState({isLoggedIn: true});
+  }
 
+  componentDidMount() {
+    console.log("ItemsList.js - Loading items")
 /*
     fetch("https://zqpjajqli1.execute-api.us-west-2.amazonaws.com/dev/items")
       .then(response => {
@@ -67,7 +78,9 @@ class ItemsList extends React.Component {
                 <li className="ItemListRow" key={item.item_id} >
                   <span className="ItemListDesc">{item.description}</span>
                   <span className="ItemListPrice">${item.price}</span>
-                  <span className="ItemListBtn"><input type="button" value="Add" /></span>
+                  <span className="ItemListBtn">
+                    <AddButton onClick={() => this.handleAddClick(item.item_id)} />
+                  </span>
                 </li>
               );
             })}
@@ -77,5 +90,14 @@ class ItemsList extends React.Component {
     );
   }
 }
+
+function AddButton(props) {
+  return (
+    <button onClick={props.onClick}>
+      Add
+    </button>
+  );
+}
+
 
 export default ItemsList;

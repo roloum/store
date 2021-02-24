@@ -7,11 +7,33 @@ import ItemsList from './components/ItemsList';
 
 class App extends React.Component {
 
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      showCart: false,
+      cartId: null
+    };
+
+  }
+  addItemOnClick (itemId) {
+    console.log("onAddItemClick sent from App id: ", itemId)
+  }
+
   render() {
+    const showCart = this.state.showCart;
+    let section;
+
+    if (showCart) {
+      section = <Cart />;
+    } else {
+      section = <ItemsList addItemOnClick={this.addItemOnClick}/>;
+    }
+
     return (
       <div className="App">
         <Header />
-        <ItemsList />
+        {section}
       </div>
     );
   }
