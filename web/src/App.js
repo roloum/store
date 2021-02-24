@@ -12,12 +12,52 @@ class App extends React.Component {
 
     this.state = {
       showCart: false,
-      cartId: null
+      cartId: null,
+      cart: null,
     };
 
   }
-  addItemOnClick (itemId) {
-    console.log("onAddItemClick sent from App id: ", itemId)
+  addItemOnClick (item) {
+
+    const data = {
+      "item_id": item.item_id,
+      "description": item.description,
+      "quantity": 1,
+      "price": item.price
+    }
+
+    console.log("Adding item from App: ", data)
+
+    const url = "https://zqpjajqli1.execute-api.us-west-2.amazonaws.com/dev/cart"
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+        // 'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: JSON.stringify(data) // body data type must match "Content-Type" header
+      })
+    .then( (response) => {
+
+      if (!response.status === 201 ||
+          !response.headers.get("Content-Type") === "application/json") {
+          throw new TypeError(`Error adding item: `+ data.description);
+      }
+
+      return response.json()
+
+    })
+    .then( (result) => {
+      console.log("logging result")
+      console.log(result)
+    })
+    .catch(e => {
+      //Display error message
+      console.log("Error: ", e)
+      return
+    });
+
   }
 
   render() {
