@@ -39,7 +39,12 @@ class App extends React.Component {
 
     console.log("Adding item from App: ", data)
 
-    const url = "https://zqpjajqli1.execute-api.us-west-2.amazonaws.com/dev/cart"
+    let url = "https://zqpjajqli1.execute-api.us-west-2.amazonaws.com/dev/cart"
+    if (this.state.cartId !== null) {
+      url += "/"+this.state.cartId
+    }
+
+    console.log(url)
 
     fetch(url, {
       method: 'POST',
@@ -63,7 +68,7 @@ class App extends React.Component {
       console.log("logging result")
       console.log(result)
       console.log("show cart true")
-      this.setState({showCart: true, cart: result})
+      this.setState({showCart: true, cart: result, cartId: result.cart_id})
       //this.forceUpdate()
     })
     .catch(e => {

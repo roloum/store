@@ -14,8 +14,11 @@ class ItemsList extends React.Component {
     this.backOnClick = props.backOnClick;
 
     this.state = {
-      items: null
+      items: null,
+      cartId: props.cartId
     };
+
+    console.log("cartId on items list ", this.state.cartId)
   }
 
   handleAddClick(item) {
