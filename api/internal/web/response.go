@@ -18,6 +18,10 @@ func GetResponse(ctx context.Context, data interface{},
 
 	headers := map[string]string{
 		"Content-Type": "application/json",
+		// Required for CORS support to work
+		"Access-Control-Allow-Origin": "*",
+		// Required for cookies, authorization headers with HTTPS
+		"Access-Control-Allow-Credentials": "true",
 	}
 
 	js, err := json.Marshal(data)
