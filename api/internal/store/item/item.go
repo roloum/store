@@ -52,14 +52,6 @@ func (h *Handler) List(ctx context.Context) (*List, error) {
 					{S: aws.String(DynamoDBPrefixItem)},
 				},
 			},
-			//"sk": {
-			//	ComparisonOperator: aws.String("BEGINS_WITH"),
-			//	AttributeValueList: []*dynamodb.AttributeValue{
-			//		{
-			//			S: aws.String(DynamoDBPrefixItem),
-			//		},
-			//	},
-			//},
 		},
 		ProjectionExpression: aws.String("item_id,description,price"),
 		TableName:            aws.String(h.tableName),
