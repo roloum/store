@@ -87,13 +87,20 @@ class ItemsList extends React.Component {
   }
 }
 
-function AddButton(props) {
-  return (
-    <button onClick={props.onClick}>
-      Add
-    </button>
-  );
-}
+class AddButton extends React.Component {
 
+  constructor(props) {
+    super(props);
+    this.onClick = props.onClick
+  }
+
+  render () {
+    return (
+      <button onClick={this.onClick}>
+        Add
+      </button>
+    );
+  }
+}
 
 export default ItemsList;
