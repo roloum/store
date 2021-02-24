@@ -65,6 +65,7 @@ functions:
       - http:
           path: items
           method: get
+          cors: true
   cart:
     handler: bin/cart
     events:
@@ -72,19 +73,24 @@ functions:
       - http:
           path: cart/{cart_id}
           method: get
+          cors: true
       # Creates the shopping cart and adds the first item
       - http:
           path: cart
           method: post
+          cors: true
       # Adds a item to the shopping cart
       - http:
           path: cart/{cart_id}
           method: post
+          cors: true
       # Updates the quantity of an item
       - http:
           path: cart/{cart_id}/items/{item_id}
           method: patch
+          cors: true
       # Deletes item from cart
       - http:
           path: cart/{cart_id}/items/{item_id}
           method: delete
+          cors: true
