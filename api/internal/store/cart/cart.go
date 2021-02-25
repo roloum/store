@@ -15,6 +15,12 @@ import (
 )
 
 const (
+	//DynamoDBRowTypeCart Attribute used to identify a row of type cart
+	DynamoDBRowTypeCart = "Cart"
+
+	//DynamoDBRowTypeCartItem Attribute used to identify an item in the shopping cart
+	DynamoDBRowTypeCartItem = "CartItem"
+
 	//DynamoDBPrefixCart Prexix for the shopping key
 	DynamoDBPrefixCart = "CART#"
 
@@ -97,6 +103,7 @@ func (h *Handler) CreateAndAddItem(ctx context.Context, ni *NewItemInfo) (*Cart,
 						"pk":      {S: aws.String(getCartPK(ni.CartID))},
 						"sk":      {S: aws.String(getCartPK(ni.CartID))},
 						"cart_id": {S: aws.String(ni.CartID)},
+						"type":    {S: aws.String(DynamoDBRowTypeCart)},
 					},
 					TableName:           aws.String(h.tableName),
 					ConditionExpression: aws.String("attribute_not_exists(pk) and attribute_not_exists(sk)"),
@@ -290,6 +297,7 @@ func getNewItemDynamoAttributes(ni *NewItemInfo) map[string]*dynamodb.AttributeV
 	return map[string]*dynamodb.AttributeValue{
 		"pk":          {S: aws.String(getCartPK(ni.CartID))},
 		"sk":          {S: aws.String(getItemSK(ni.ItemID))},
+		"type":        {S: aws.String(DynamoDBRowTypeCartItem)},
 		"cart_id":     {S: aws.String(ni.CartID)},
 		"item_id":     {S: aws.String(ni.ItemID)},
 		"description": {S: aws.String(ni.Description)},
