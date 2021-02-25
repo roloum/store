@@ -94,7 +94,7 @@ class Cart extends React.Component {
                   </div>
                   <div>
                     <div>
-                      <span className="ItemListPrice">{item.quantity}</span>
+                      Quantity: <span className="CartListPrice">{item.quantity}</span>
                     </div>
                     <div>
                       <DeleteItemButton onClick={() => this.handleDeleteItemClick(item)} />
