@@ -9,11 +9,11 @@ provider:
     shouldStartNameWithService: true
   }
   stage: ${opt:stage, 'dev'}
-  region: ${self:provider.environment.STORE_AWS_REGION}
+  region: ${self:provider.environment.STORE_AWS_REGION, 'us-west-2'}
   environment:
-    STORE_AWS_DYNAMODB_TABLE_STORE: ${env:STORE_AWS_DYNAMODB_TABLE_STORE}
-    STORE_AWS_REGION: ${env:STORE_AWS_REGION}
-    STORE_LOG_LEVEL: ${env:STORE_LOG_LEVEL}
+    STORE_AWS_DYNAMODB_TABLE_STORE: ${env:STORE_AWS_DYNAMODB_TABLE_STORE, 'Store'}
+    STORE_AWS_REGION: ${env:STORE_AWS_REGION, 'us-west-2'}
+    STORE_LOG_LEVEL: ${env:STORE_LOG_LEVEL, 'info'}
 
 
   iamRoleStatements:
