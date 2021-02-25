@@ -7,7 +7,7 @@ import ItemsList from './components/ItemsList';
 class App extends React.Component {
 
   constructor (props) {
-    super(props)
+    super(props);
 
     this.state = {
       showCart: true,
@@ -20,11 +20,11 @@ class App extends React.Component {
   }
 
   addItemOnClick () {
-    this.setState({showCart: false})
+    this.setState({showCart: false});
   }
 
   backOnClick () {
-    this.setState({showCart: true})
+    this.setState({showCart: true});
   }
 
   addOnClick (cart) {
@@ -35,7 +35,7 @@ class App extends React.Component {
       cartId: cart.cart_id,
       subtotal: cart.total,
       itemCount: cart.count
-    })
+    });
 
   }
 
@@ -51,10 +51,10 @@ class App extends React.Component {
       cartId: cart.cart_id,
       subtotal: cart.total,
       itemCount: cart.count
-    })
+    });
     this.setState({
       showCart: true
-    })
+    });
   }
 
   render() {
@@ -67,7 +67,7 @@ class App extends React.Component {
         addItemOnClick: this.addItemOnClick,
         cart: this.state.cart,
         parent: this
-      }
+      };
       section = <Cart {...props}/>;
     } else {
 
@@ -76,7 +76,7 @@ class App extends React.Component {
         backOnClick: this.backOnClick,
         cartId: this.state.cartId,
         parent: this
-      }
+      };
       section = <ItemsList {...props}/>;
     }
 

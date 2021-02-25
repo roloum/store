@@ -27,13 +27,13 @@ class ItemsList extends React.Component {
       "description": item.description,
       "quantity": 1,
       "price": item.price
-    }
+    };
 
-    const serverUrl = "https://changethisurl.com"
+    const serverUrl = "https://changethisurl.com";
 
-    let url = serverUrl + "/cart"
+    let url = serverUrl + "/cart";
     if (this.state.cartId !== null) {
-      url += "/"+this.state.cartId
+      url += "/"+this.state.cartId;
     }
 
     fetch(url, {
@@ -51,30 +51,29 @@ class ItemsList extends React.Component {
           throw new TypeError(`Error adding item: `+ data.description);
       }
 
-      return response.json()
+      return response.json();
 
     })
     .then( (result) => {
 
-      this.addOnClick(result)
+      this.addOnClick(result);
 
     })
     .catch(e => {
       //Display error message
-      console.log("Error: ", e)
-      return
+      console.log("Error: ", e);
     });
 
   }
 
   handleBackClick() {
-    this.backOnClick()
+    this.backOnClick();
   }
 
   componentDidMount() {
-    const serverUrl = "https://changethisurl.com"
+    const serverUrl = "https://changethisurl.com";
 
-    const url = serverUrl + "/items"
+    const url = serverUrl + "/items";
     fetch(url)
       .then( (response) => {
 
@@ -83,7 +82,7 @@ class ItemsList extends React.Component {
             throw new TypeError(`Error loading the items list`);
         }
 
-        return response.json()
+        return response.json();
 
       })
       .then((result) => {
@@ -91,7 +90,7 @@ class ItemsList extends React.Component {
       })
       .catch(e => {
         //Display error message
-        console.log("Error: ", e)
+        console.log("Error: ", e);
       })
 
   }
@@ -148,7 +147,7 @@ class BackButton extends React.Component {
 
   constructor(props) {
     super(props);
-    this.onClick = props.onClick
+    this.onClick = props.onClick;
   }
 
   render () {
@@ -165,7 +164,7 @@ class AddButton extends React.Component {
 
   constructor(props) {
     super(props);
-    this.onClick = props.onClick
+    this.onClick = props.onClick;
   }
 
   render () {

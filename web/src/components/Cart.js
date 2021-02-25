@@ -3,7 +3,7 @@ import React from 'react';
 class Cart extends React.Component {
 
   constructor (props) {
-    super (props)
+    super (props);
 
     //bind button to App.js so we can display the list of items
     this.handleAddItemClick = this.handleAddItemClick.bind(props.parent);
@@ -21,7 +21,7 @@ class Cart extends React.Component {
 
   handleAddItemClick () {
 
-    this.addItemOnClick()
+    this.addItemOnClick();
 
   }
 
@@ -29,10 +29,10 @@ class Cart extends React.Component {
 
     const cart = this.state.cart;
 
-    const serverUrl = "https://changethisurl.com"
+    const serverUrl = "https://changethisurl.com";
 
-    const endpoint = "/cart/"+cart.cart_id+"/items/"+item.item_id
-    const url = serverUrl + endpoint
+    const endpoint = "/cart/"+cart.cart_id+"/items/"+item.item_id;
+    const url = serverUrl + endpoint;
 
     fetch(url, {
       method: 'DELETE',
@@ -46,22 +46,22 @@ class Cart extends React.Component {
           throw new TypeError(`Error deleting item: `+ item.description);
       }
 
-      return response.json()
+      return response.json();
 
     })
     .then( (result) => {
-      this.deleteItemOnClick(result)
+      this.deleteItemOnClick(result);
     })
     .catch(e => {
       //Display error message
-      console.log("Error: ", e)
+      console.log("Error: ", e);
     });
 
   }
 
   render() {
 
-    const cart = this.state.cart
+    const cart = this.state.cart;
 
     if (!cart || !cart.items || cart.items.length === 0) {
       return (
@@ -115,7 +115,7 @@ class AddItemButton extends React.Component {
 
   constructor(props) {
     super(props);
-    this.onClick = props.onClick
+    this.onClick = props.onClick;
   }
 
   render () {
@@ -131,7 +131,7 @@ class DeleteItemButton extends React.Component {
 
   constructor(props) {
     super(props);
-    this.onClick = props.onClick
+    this.onClick = props.onClick;
   }
 
   render () {
