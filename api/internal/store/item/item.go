@@ -42,6 +42,8 @@ func New(svc dynamodbiface.DynamoDBAPI, tableName string) (*Handler, error) {
 }
 
 //List returns the information of an item
+//Eventuallly, this method will receive a category id
+//For now, it loads all items from category 1
 func (h *Handler) List(ctx context.Context) (*List, error) {
 
 	result, err := h.svc.QueryWithContext(ctx, &dynamodb.QueryInput{
@@ -49,7 +51,8 @@ func (h *Handler) List(ctx context.Context) (*List, error) {
 			"pk": {
 				ComparisonOperator: aws.String("EQ"),
 				AttributeValueList: []*dynamodb.AttributeValue{
-					{S: aws.String(DynamoDBPrefixItem)},
+					//Load items from category 1
+					{S: aws.String("CATEGORY#1")},
 				},
 			},
 		},
