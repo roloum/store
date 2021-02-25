@@ -121,8 +121,9 @@ aws_secret_access_key = [secret_key]
 ## Installing react application
 - cd web
 - Update the server url in the following files:
- - components/Cart.js
- - components/ItemsList.js
+ - src/components/ItemsList.js:    const serverUrl = "https://changethisurl.com"
+ - src/components/ItemsList.js:    const serverUrl = "https://changethisurl.com"
+ - src/components/Cart.js:    const serverUrl = "https://changethisurl.com"
 - npm start
 
 ## Run application
