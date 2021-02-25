@@ -70,7 +70,6 @@ class ItemsList extends React.Component {
   }
 
   componentDidMount() {
-    /*
     const url = "https://zqpjajqli1.execute-api.us-west-2.amazonaws.com/dev/items"
     fetch(url)
       .then( (response) => {
@@ -90,8 +89,6 @@ class ItemsList extends React.Component {
         //Display error message
         console.log("Error: ", e)
       })
-      */
-    this.setState({items: [{"item_id":"0dbe71c6-8584-43cd-be13-69ddf5651289","description":"Water bottle","price":4},{"item_id":"5408ea4e-1674-484a-947c-721e205b7d7f","description":"Book","price":10.99},{"item_id":"609544d0-1d17-4739-8056-9432bfd197bc","description":"Umbrella","price":7.29},{"item_id":"83adae8c-adee-4729-974d-452c8c30aa6c","description":"Pen","price":0.99},{"item_id":"9008e368-b2e0-4fe6-a677-33148a4af036","description":"Headphones","price":17.99},{"item_id":"b448e2a1-abd0-4a92-80e3-523fc0929487","description":"Jacket","price":59.99}]})
 
   }
 
