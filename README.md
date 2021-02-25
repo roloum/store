@@ -134,3 +134,13 @@ aws_secret_access_key = [secret_key]
 
 ## Run application
 - http://localhost:3000/
+
+# Screenshots
+## Empty shopping cart
+![Empty shopping cart](https://github.com/roloum/store/blob/main/screenshots/shopping_cart_empty.jpeg?raw=true)
+
+## Items list
+![Items list](https://github.com/roloum/store/blob/main/screenshots/shopping_cart_items_list.jpeg?raw=true)
+
+## Shopping cart
+![Shopping cart](https://github.com/roloum/store/blob/main/screenshots/shopping_cart.jpeg?raw=true)
