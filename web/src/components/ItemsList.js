@@ -29,7 +29,9 @@ class ItemsList extends React.Component {
       "price": item.price
     }
 
-    let url = "https://zqpjajqli1.execute-api.us-west-2.amazonaws.com/dev/cart"
+    const serverUrl = "https://changethisurl.com"
+
+    let url = serverUrl + "/cart"
     if (this.state.cartId !== null) {
       url += "/"+this.state.cartId
     }
@@ -70,7 +72,9 @@ class ItemsList extends React.Component {
   }
 
   componentDidMount() {
-    const url = "https://zqpjajqli1.execute-api.us-west-2.amazonaws.com/dev/items"
+    const serverUrl = "https://changethisurl.com"
+
+    const url = serverUrl + "/items"
     fetch(url)
       .then( (response) => {
 

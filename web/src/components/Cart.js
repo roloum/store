@@ -12,12 +12,11 @@ class Cart extends React.Component {
     this.handleDeleteItemClick = this.handleDeleteItemClick.bind(props.parent);
     this.deleteItemOnClick = props.deleteItemOnClick;
 
-    this.getCart = props.getCart
-
+    this.getCart = props.getCart;
 
     this.state = {
       cart: props.cart
-    }
+    };
   }
 
   handleAddItemClick () {
@@ -28,10 +27,12 @@ class Cart extends React.Component {
 
   handleDeleteItemClick (item) {
 
-    const cart = this.state.cart
+    const cart = this.state.cart;
+
+    const serverUrl = "https://changethisurl.com"
 
     const endpoint = "/cart/"+cart.cart_id+"/items/"+item.item_id
-    const url = "https://zqpjajqli1.execute-api.us-west-2.amazonaws.com/dev" + endpoint
+    const url = serverUrl + endpoint
 
     fetch(url, {
       method: 'DELETE',
