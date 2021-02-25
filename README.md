@@ -6,8 +6,8 @@ The following is a list of ideas that, due to initial requirements or time const
 
 ## Architectural
 - There is no authentication
-- Since the API is public, it is going to be restricted to a certain number of calls
-- Caching for hot partitions in DynamoDB or queries that are frequently executed
+- Use DAX or another caching mechanism for hot partitions in DynamoDB or queries that are frequently executed
+- https://aws.amazon.com/blogs/database/choosing-the-right-dynamodb-partition-key/
 - Docker container for frontend component (using npm start for now)
 - localstack for serverless backend component (currently deploying to AWS)
 - React configuration using webpack
@@ -22,6 +22,10 @@ The following is a list of ideas that, due to initial requirements or time const
 - Float overflow of item's price
 - Loader
 - More test coverage
+
+# Architecture
+## Backend component
+
 
 # API Endpoints
 There are 5 API endpoints:
