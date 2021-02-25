@@ -41,6 +41,10 @@ class App extends React.Component {
 
   deleteItemOnClick (cart) {
 
+    //Need to look find a better way to render the cart component
+    //Updating the cart in the component state did not do the work
+    //Unless the showCart flag is changed to false and then back to true
+    //Doing this will cause an extra request of the items list
     this.setState({
       showCart: false,
       cart: cart,
