@@ -10,6 +10,7 @@ The following is a list of ideas that, due to initial requirements or time const
 - Caching for hot partitions in DynamoDB or queries that are frequently executed
 - Docker container for frontend component (using npm start for now)
 - localstack for serverless backend component (currently deploying to AWS)
+- React configuration using webpack
 
 ## Functional
 - Update quantity in shopping cart
@@ -86,6 +87,14 @@ aws_secret_access_key = [secret_key]
 - make
 - sls deploy --aws-profile [profile_name]
 - aws dynamodb batch-write-item --request-items file://seed/itemsCatalog.json
-- store the endpoints server name since we're going to need it for the React application
+- store the endpoints server url since we're going to need it for the React application
 
 ## Installing react application
+- cd web
+- Update the server url in the following files:
+ - components/Cart.js
+ - components/ItemsList.js
+- npm start
+
+## Run application
+- http://localhost:3000/
