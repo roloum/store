@@ -4,10 +4,21 @@
           "PutRequest": {
               "Item": {
                   "pk": {"S": "CATEGORY#1"},
+                  "sk": {"S": "CATEGORY#1"},
+                  "type": {"S": "Category"},
+                  "category_id": {"S": "1"},
+                  "name": {"S": "Electronics"}
+              }
+          }
+      },
+      {
+          "PutRequest": {
+              "Item": {
+                  "pk": {"S": "CATEGORY#1"},
                   "sk": {"S": "ITEM#83adae8c-adee-4729-974d-452c8c30aa6c"},
                   "type": {"S": "Item"},
                   "item_id": {"S": "83adae8c-adee-4729-974d-452c8c30aa6c"},
-                  "description": {"S": "Pen"},
+                  "description": {"S": "SIM Card"},
                   "price": {"N": "0.99"}
               }
           }
@@ -19,7 +30,7 @@
                   "sk": {"S": "ITEM#5408ea4e-1674-484a-947c-721e205b7d7f"},
                   "type": {"S": "Item"},
                   "item_id": {"S": "5408ea4e-1674-484a-947c-721e205b7d7f"},
-                  "description": {"S": "Book"},
+                  "description": {"S": "Phone charger"},
                   "price": {"N": "10.99"}
               }
           }
@@ -31,7 +42,7 @@
                   "sk": {"S": "ITEM#0dbe71c6-8584-43cd-be13-69ddf5651289"},
                   "type": {"S": "Item"},
                   "item_id": {"S": "0dbe71c6-8584-43cd-be13-69ddf5651289"},
-                  "description": {"S": "Water bottle"},
+                  "description": {"S": "Mouse"},
                   "price": {"N": "4"}
               }
           }
@@ -43,7 +54,7 @@
                   "sk": {"S": "ITEM#9008e368-b2e0-4fe6-a677-33148a4af036"},
                   "type": {"S": "Item"},
                   "item_id": {"S": "9008e368-b2e0-4fe6-a677-33148a4af036"},
-                  "description": {"S": "Headphones"},
+                  "description": {"S": "Camera"},
                   "price": {"N": "17.99"}
               }
           }
@@ -55,7 +66,7 @@
                   "sk": {"S": "ITEM#609544d0-1d17-4739-8056-9432bfd197bc"},
                   "type": {"S": "Item"},
                   "item_id": {"S": "609544d0-1d17-4739-8056-9432bfd197bc"},
-                  "description": {"S": "Umbrella"},
+                  "description": {"S": "Headphones"},
                   "price": {"N": "7.29"}
               }
           }
@@ -67,7 +78,7 @@
                   "sk": {"S": "ITEM#b448e2a1-abd0-4a92-80e3-523fc0929487"},
                   "type": {"S": "Item"},
                   "item_id": {"S": "b448e2a1-abd0-4a92-80e3-523fc0929487"},
-                  "description": {"S": "Jacket"},
+                  "description": {"S": "Laptop"},
                   "price": {"N": "59.99"}
               }
           }
