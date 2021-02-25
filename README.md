@@ -30,6 +30,27 @@ The backend API is implemented in Go, using:
  - AWS APIGateway for accessing the functions (CORS is enabled in order to grant access for requests from dev environments)
  - DynamoDB for the database
 
+ There are two components in the application:
+ - api/internal/store/cart: contains the logic for all the functionality related to the shopping cart (create cart, add, update and delete item)
+ - api/internal/store/item: for now, it contains the logic to return the list of items
+
+ I am using the fat lambda approach, so there are two main binaries:
+  - bin/cart: receives GET, POST, PATCH and DELETE requests
+  - bin/item: receives GET requests
+
+## Database design
+I am using the single table design approach for DynamoDB, overloading the keys to store multiple entities.
+
+There are 3 entities in the application:
+ - Category
+ - Item
+ - Cart
+
+There is a 1-N relationship between Category and Item.
+There is a N-N relationship between Cart and Item.
+
+## Frontend component
+The frontend application is implemented using React. It requires npm to run.
 
 # API Endpoints
 There are 5 API endpoints:
@@ -42,10 +63,10 @@ Retrieves the information of a shopping cart
 - POST: /cart
 Creates a shopping cart in the database and adds an item.
 Parameters:
- -- "item_id"
- -- "description"
- -- "quantity"
- -- "price"
+ - "item_id"
+ - "description"
+ - "quantity"
+ - "price"
 
 - POST: /cart/{cartId}
 Adds an item to an existing shopping cart
