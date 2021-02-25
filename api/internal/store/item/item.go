@@ -71,7 +71,7 @@ func (h *Handler) List(ctx context.Context) (*List, error) {
 		return nil, ErrCouldNotLoadItems
 	}
 
-	l := List{}
+	l := List{Items: []Item{}}
 
 	if *result.Count == int64(0) {
 		return &l, nil
