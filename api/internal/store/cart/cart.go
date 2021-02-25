@@ -111,7 +111,16 @@ func (h *Handler) CreateAndAddItem(ctx context.Context, ni *NewItemInfo) (*Cart,
 			},
 			{
 				Put: &dynamodb.Put{
-					Item:                getNewItemDynamoAttributes(ni),
+					Item: map[string]*dynamodb.AttributeValue{
+						"pk":          {S: aws.String(getCartPK(ni.CartID))},
+						"sk":          {S: aws.String(getItemSK(ni.ItemID))},
+						"type":        {S: aws.String(DynamoDBRowTypeCartItem)},
+						"cart_id":     {S: aws.String(ni.CartID)},
+						"item_id":     {S: aws.String(ni.ItemID)},
+						"description": {S: aws.String(ni.Description)},
+						"price":       {N: aws.String(fmt.Sprintf("%f", ni.Price))},
+						"quantity":    {N: aws.String(strconv.Itoa(ni.Quantity))},
+					},
 					TableName:           aws.String(h.tableName),
 					ConditionExpression: aws.String("attribute_not_exists(pk) and attribute_not_exists(sk)"),
 				},
@@ -129,7 +138,8 @@ func (h *Handler) CreateAndAddItem(ctx context.Context, ni *NewItemInfo) (*Cart,
 	return h.Load(ctx, ni.CartID)
 }
 
-//AddItem Adds new item to the shopping cart
+//AddItem Adds new item to the shopping cart.
+//If the item already exists in the shopping cart, it increments the quantity
 //Receives the NewItemInfo with all the information about the new item
 //We only add the item if the shopping cart exists
 func (h *Handler) AddItem(ctx context.Context, ni *NewItemInfo) (*Cart, error) {
@@ -141,26 +151,32 @@ func (h *Handler) AddItem(ctx context.Context, ni *NewItemInfo) (*Cart, error) {
 
 	log.Debug().Msgf("Adding item %s to cart %s", ni.Description, ni.CartID)
 
-	_, err := h.svc.TransactWriteItemsWithContext(ctx, &dynamodb.TransactWriteItemsInput{
-		TransactItems: []*dynamodb.TransactWriteItem{
-			{
-				ConditionCheck: &dynamodb.ConditionCheck{
-					Key: map[string]*dynamodb.AttributeValue{
-						"pk": {S: aws.String(getCartPK(ni.CartID))},
-						"sk": {S: aws.String(getCartPK(ni.CartID))},
-					},
-					TableName:           aws.String(h.tableName),
-					ConditionExpression: aws.String("attribute_exists(pk) and attribute_exists(sk)"),
-				},
-			},
-			{
-				Put: &dynamodb.Put{
-					Item:                getNewItemDynamoAttributes(ni),
-					TableName:           aws.String(h.tableName),
-					ConditionExpression: aws.String("attribute_not_exists(pk) and attribute_not_exists(sk)"),
-				},
-			},
+	_, err := h.svc.UpdateItemWithContext(ctx, &dynamodb.UpdateItemInput{
+		Key: map[string]*dynamodb.AttributeValue{
+			"pk": {S: aws.String(getCartPK(ni.CartID))},
+			"sk": {S: aws.String(getItemSK(ni.ItemID))},
 		},
+		ExpressionAttributeNames: map[string]*string{
+			"#t": aws.String("type"),
+			"#c": aws.String("cart_id"),
+			"#i": aws.String("item_id"),
+			"#d": aws.String("description"),
+			"#p": aws.String("price"),
+			"#q": aws.String("quantity"),
+		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":t":    {S: aws.String(DynamoDBRowTypeCartItem)},
+			":c":    {S: aws.String(ni.CartID)},
+			":i":    {S: aws.String(ni.ItemID)},
+			":d":    {S: aws.String(ni.Description)},
+			":p":    {N: aws.String(fmt.Sprintf("%f", ni.Price))},
+			":q":    {N: aws.String(strconv.Itoa(ni.Quantity))},
+			":zero": {N: aws.String(strconv.Itoa(0))},
+		},
+		UpdateExpression: aws.String(
+			"set #t=:t, #c=:c, #i=:i, #d=:d, #p=:p, #q = if_not_exists(#q, :zero) + :q",
+		),
+		TableName: aws.String(h.tableName),
 	})
 
 	if err != nil {
@@ -289,21 +305,6 @@ func (h *Handler) Load(ctx context.Context, cartID string) (*Cart, error) {
 	c.calculateTotal()
 
 	return &c, nil
-}
-
-//getNewItemDynamoAttributes Returns an array of attribute values for the
-//item is going to be inserted by the Put method
-func getNewItemDynamoAttributes(ni *NewItemInfo) map[string]*dynamodb.AttributeValue {
-	return map[string]*dynamodb.AttributeValue{
-		"pk":          {S: aws.String(getCartPK(ni.CartID))},
-		"sk":          {S: aws.String(getItemSK(ni.ItemID))},
-		"type":        {S: aws.String(DynamoDBRowTypeCartItem)},
-		"cart_id":     {S: aws.String(ni.CartID)},
-		"item_id":     {S: aws.String(ni.ItemID)},
-		"description": {S: aws.String(ni.Description)},
-		"price":       {N: aws.String(fmt.Sprintf("%f", ni.Price))},
-		"quantity":    {N: aws.String(strconv.Itoa(ni.Quantity))},
-	}
 }
 
 //getCartPK returns the shopping cartID formatted for the primary key column
