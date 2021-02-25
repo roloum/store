@@ -7,17 +7,17 @@ class Cart extends React.Component {
 
     //bind button to App.js so we can display the list of items
     this.handleAddItemClick = this.handleAddItemClick.bind(props.parent);
-
     this.addItemOnClick = props.addItemOnClick;
 
-    console.log("cart.js displaying cart on props")
-    console.log(props.cart)
+    this.handleDeleteItemClick = this.handleDeleteItemClick.bind(props.parent);
+    this.deleteItemOnClick = props.deleteItemOnClick;
+
+    this.getCart = props.getCart
+
 
     this.state = {
       cart: props.cart
     }
-    console.log("cart.js displaying cart on state")
-    console.log(this.state.cart)
   }
 
   handleAddItemClick () {
@@ -26,11 +26,43 @@ class Cart extends React.Component {
 
   }
 
-  render() {
-    console.log("cart.js displaying items on render")
-    console.log(this.state.cart)
+  handleDeleteItemClick (item) {
 
-    if (!this.state.cart || !this.state.cart.items || this.state.cart.items.length === 0) {
+    const cart = this.state.cart
+
+    const endpoint = "/cart/"+cart.cart_id+"/items/"+item.item_id
+    const url = "https://zqpjajqli1.execute-api.us-west-2.amazonaws.com/dev" + endpoint
+
+    fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then( (response) => {
+
+      if (!response.ok) {
+          throw new TypeError(`Error deleting item: `+ item.description);
+      }
+
+      return response.json()
+
+    })
+    .then( (result) => {
+      this.deleteItemOnClick(result)
+    })
+    .catch(e => {
+      //Display error message
+      console.log("Error: ", e)
+    });
+
+  }
+
+  render() {
+
+    const cart = this.state.cart
+
+    if (!cart || !cart.items || cart.items.length === 0) {
       return (
         <div>
           <div>
@@ -52,13 +84,22 @@ class Cart extends React.Component {
         <h2>Items</h2>
         </div>
         <div>
-          <ul className="ItemsUL">
-            {this.state.cart.items.map((item) => {
+          <ul className="CartUL">
+            {cart.items.map((item) => {
               return (
-                <li className="ItemListRow" key={item.item_id} >
-                  <span className="ItemListDesc">{item.description}</span>
-                  <span className="ItemListPrice">{item.quantity}</span>
-                  <span className="ItemListPrice">${item.price}</span>
+                <li className="CartListRow" key={item.item_id} >
+                  <div>
+                  <span className="CartListDesc">{item.description}</span>
+                  <span className="CartListPrice">${item.price}</span>
+                  </div>
+                  <div>
+                    <div>
+                      <span className="ItemListPrice">{item.quantity}</span>
+                    </div>
+                    <div>
+                      <DeleteItemButton onClick={() => this.handleDeleteItemClick(item)} />
+                    </div>
+                  </div>
                 </li>
               );
             })}
@@ -80,6 +121,22 @@ class AddItemButton extends React.Component {
     return (
       <button onClick={this.onClick}>
         Add Items
+      </button>
+    );
+  }
+}
+
+class DeleteItemButton extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.onClick = props.onClick
+  }
+
+  render () {
+    return (
+      <button onClick={this.onClick}>
+        Delete
       </button>
     );
   }

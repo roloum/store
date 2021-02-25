@@ -20,12 +20,10 @@ class App extends React.Component {
   }
 
   addItemOnClick () {
-    console.log("add item on click app.js hide cart")
     this.setState({showCart: false})
   }
 
   backOnClick () {
-    console.log("back on click app.js show cart")
     this.setState({showCart: true})
   }
 
@@ -37,6 +35,21 @@ class App extends React.Component {
       cartId: cart.cart_id,
       subtotal: cart.total,
       itemCount: cart.count
+    })
+
+  }
+
+  deleteItemOnClick (cart) {
+
+    this.setState({
+      showCart: false,
+      cart: cart,
+      cartId: cart.cart_id,
+      subtotal: cart.total,
+      itemCount: cart.count
+    })
+    this.setState({
+      showCart: true
     })
   }
 

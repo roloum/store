@@ -18,7 +18,6 @@ class ItemsList extends React.Component {
       cartId: props.cartId
     };
 
-    console.log("cartId on items list ", this.state.cartId)
   }
 
   handleAddClick(item) {
@@ -30,14 +29,10 @@ class ItemsList extends React.Component {
       "price": item.price
     }
 
-    console.log("Adding item from App: ", data)
-
     let url = "https://zqpjajqli1.execute-api.us-west-2.amazonaws.com/dev/cart"
     if (this.state.cartId !== null) {
       url += "/"+this.state.cartId
     }
-
-    console.log(url)
 
     fetch(url, {
       method: 'POST',
@@ -58,14 +53,9 @@ class ItemsList extends React.Component {
 
     })
     .then( (result) => {
-      console.log("logging result")
-      console.log(result)
-      console.log("show cart true")
 
       this.addOnClick(result)
 
-      
-      //this.forceUpdate()
     })
     .catch(e => {
       //Display error message
@@ -73,16 +63,9 @@ class ItemsList extends React.Component {
       return
     });
 
-
-
-
-
-
-
   }
 
   handleBackClick() {
-    console.log("handleBackClick on list.js")
     this.backOnClick()
   }
 

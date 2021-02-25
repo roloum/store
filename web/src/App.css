@@ -64,3 +64,24 @@
   padding-top: 10px;
   padding-bottom: 10px;
 }
+
+.CartUL {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.CartListRow {
+  border-style: solid;
+  border-width: 1px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.CartListDesc {
+  width: 70%;
+  float:left;
+}
+.CartListPrice {
+  width: 29%;
+}
