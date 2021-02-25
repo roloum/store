@@ -124,6 +124,7 @@ aws_secret_access_key = [secret_key]
  - src/components/ItemsList.js:    const serverUrl = "https://changethisurl.com"
  - src/components/ItemsList.js:    const serverUrl = "https://changethisurl.com"
  - src/components/Cart.js:    const serverUrl = "https://changethisurl.com"
+- npm install
 - npm start
 
 ## Run application
