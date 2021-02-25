@@ -10,7 +10,7 @@ The following is a list of ideas that, due to initial requirements or time const
 - https://aws.amazon.com/blogs/database/choosing-the-right-dynamodb-partition-key/
 - Docker container for frontend component (using npm start for now)
 - localstack for serverless backend component (currently deploying to AWS)
-- React configuration using webpack
+- React configuration using webpack or another approach
 
 ## Functional
 - Update quantity in shopping cart
@@ -25,6 +25,10 @@ The following is a list of ideas that, due to initial requirements or time const
 
 # Architecture
 ## Backend component
+The backend API is implemented in Go, using:
+ - AWS Lambda for the API functions
+ - AWS APIGateway for accessing the functions (CORS is enabled in order to grant access for requests from dev environments)
+ - DynamoDB for the database
 
 
 # API Endpoints
@@ -38,10 +42,10 @@ Retrieves the information of a shopping cart
 - POST: /cart
 Creates a shopping cart in the database and adds an item.
 Parameters:
- - "item_id"
- - "description"
- - "quantity"
- - "price"
+ -- "item_id"
+ -- "description"
+ -- "quantity"
+ -- "price"
 
 - POST: /cart/{cartId}
 Adds an item to an existing shopping cart
