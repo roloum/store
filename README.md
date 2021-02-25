@@ -14,7 +14,7 @@ The following is a list of ideas that, due to initial requirements or time const
 
 ## Functional
 - Update quantity in shopping cart
-- Store cart_id in cookie or local storage so you can revisit cart if browser's window is closed
+- Store cart_id in cookie or local storage so you can revisit cart if the page is reloaded or the browser's window is closed
 - There is no inventory. The user can add as many products as they want
 - Unavailable products should not be added to shopping carts
 - Rows for shopping carts that were created but are empty, can be expired(deleted)
@@ -22,6 +22,10 @@ The following is a list of ideas that, due to initial requirements or time const
 - Float overflow of item's price
 - Loader
 - More test coverage
+
+## Improvements
+- Back button in the items list page does not work
+- The very first time an item is deleted from the shopping cart, there is an error while rendering the page. The code still goes ahead and renders the page and you can continue adding and deleting products. The error is only seen in the developer console.
 
 # Architecture
 ## Backend component
