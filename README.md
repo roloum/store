@@ -65,18 +65,14 @@ Retrieves the list of items by category. Right now, there is only one category.
 Retrieves the information of a shopping cart
 
 - POST: /cart
-Creates a shopping cart in the database and adds an item.
-
-Parameters:
+Creates a shopping cart in the database and adds an item. Parameters:
   - "item_id"
   - "description"
   - "quantity"
   - "price"
 
 - POST: /cart/{cartId}
-Adds an item to an existing shopping cart.
-
-Parameters:
+Adds an item to an existing shopping cart. Parameters:
   - "item_id"
   - "description"
   - "quantity"
@@ -85,9 +81,7 @@ Parameters:
  If a cart_id is sent in the request, it will return an error
 
 - PATCH: /cart/{cartId}/items/{itemId}
-Updates the quantity of an item in the shopping cart.
-
-Parameters:
+Updates the quantity of an item in the shopping cart. Parameters:
   - "quantity"
 
 - DELETE: /cart/{cartId}/items/{itemId}
