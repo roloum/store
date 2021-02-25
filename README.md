@@ -116,11 +116,11 @@ aws_secret_access_key = [secret_key]
 - make
 - sls deploy --aws-profile [profile_name]
 - aws dynamodb batch-write-item --request-items file://seed/itemsCatalog.json
-- store the endpoints server url since we're going to need it for the React application
+- store the endpoint server url since we're going to need it for the React application
 
 ## Installing react application
 - cd web
-- Update the server url in the following files:
+- Update the server url in the following files, with the value from the last step in the previous section:
  - src/components/ItemsList.js:    const serverUrl = "https://changethisurl.com"
  - src/components/ItemsList.js:    const serverUrl = "https://changethisurl.com"
  - src/components/Cart.js:    const serverUrl = "https://changethisurl.com"
