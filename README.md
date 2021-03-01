@@ -3,6 +3,7 @@ As of now, this branch is deprecated. It illustrates how to deploy the applicati
 However, it requires a change in the code, which is, we need to specify a different DynamoDB Endpoint in the configuration.
 Will try to find another solution to deploy locally, where these type of changes in the configuration are not required.
 ```
+-       dynamoSvc := dynamodb.New(sess)
 +       var dynamodbConfig *aws.Config
 +       if os.Getenv("STAGE") == "local" {
 +               dynamodbConfig.Endpoint = aws.String(os.Getenv("DYNAMODB_BACKEND"))
