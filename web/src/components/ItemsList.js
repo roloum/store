@@ -73,7 +73,9 @@ class ItemsList extends React.Component {
   componentDidMount() {
     const serverUrl = "https://changethisurl.com";
 
-    const url = serverUrl + "/items";
+    const categoryId = "1"
+
+    const url = serverUrl + "/items/" + categoryId;
     fetch(url)
       .then( (response) => {
 

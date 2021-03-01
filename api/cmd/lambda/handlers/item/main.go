@@ -17,6 +17,9 @@ import (
 const (
 	//PathParamItemID parameter name for the item_id
 	PathParamItemID = "item_id"
+
+	//PathParamCategoryID parameter name for the category_id
+	PathParamCategoryID = "category_id"
 )
 
 // Handler is our lambda handler invoked by the `lambda.Start` function call
@@ -36,7 +39,7 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest,
 	switch request.HTTPMethod {
 	case http.MethodGet:
 
-		return getItems(ctx, ih)
+		return getItems(ctx, request, ih)
 
 	}
 
@@ -47,12 +50,12 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest,
 }
 
 //getItems Returns the list of items
-func getItems(ctx context.Context, ih *item.Handler) (
-	events.APIGatewayProxyResponse, error) {
+func getItems(ctx context.Context, request events.APIGatewayProxyRequest,
+	ih *item.Handler) (events.APIGatewayProxyResponse, error) {
 
 	var list *item.List
 
-	list, err := ih.List(ctx)
+	list, err := ih.List(ctx, request.PathParameters[PathParamCategoryID])
 	if err != nil {
 		return web.GetResponse(ctx, err.Error(), http.StatusInternalServerError)
 	}

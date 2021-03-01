@@ -3,6 +3,7 @@ package item
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -13,6 +14,9 @@ import (
 
 const (
 	//DynamoDBPrefixItem Prexix for product item key
+	DynamoDBPrefixCategory = "CATEGORY#"
+
+	//DynamoDBPrefixItem Prexix for product item key
 	DynamoDBPrefixItem = "ITEM#"
 )
 
@@ -22,6 +26,9 @@ var (
 
 	//ErrCouldNotLoadItems error returned if we failed to load the cart
 	ErrCouldNotLoadItems = errors.New("CouldNotLoadItems")
+
+	//ErrCategoryIDIsEmpty error returned if the categoryID is empty
+	ErrCategoryIDIsEmpty = errors.New("CategoryIDIsEmpty")
 )
 
 //Handler struct is a handler for executing the actions related to the shopping cart
@@ -44,18 +51,26 @@ func New(svc dynamodbiface.DynamoDBAPI, tableName string) (*Handler, error) {
 //List returns the information of an item
 //Eventuallly, this method will receive a category id
 //For now, it loads all items from category 1
-func (h *Handler) List(ctx context.Context) (*List, error) {
+//It uses a GSI to load the items based on categoryID
+func (h *Handler) List(ctx context.Context, categoryID string) (*List, error) {
+
+	if categoryID == "" {
+		return nil, ErrCategoryIDIsEmpty
+	}
+
+	log.Debug().Msgf("Loading items for categoryID: %s", categoryID)
 
 	result, err := h.svc.QueryWithContext(ctx, &dynamodb.QueryInput{
+		IndexName: aws.String("gsi1pk"),
 		KeyConditions: map[string]*dynamodb.Condition{
-			"pk": {
+			"gsi1pk": {
 				ComparisonOperator: aws.String("EQ"),
 				AttributeValueList: []*dynamodb.AttributeValue{
 					//Load items from category 1
-					{S: aws.String("CATEGORY#1")},
+					{S: aws.String(getItemGSI1SK(categoryID))},
 				},
 			},
-			"sk": {
+			"gsi1sk": {
 				ComparisonOperator: aws.String("BEGINS_WITH"),
 				AttributeValueList: []*dynamodb.AttributeValue{
 					{S: aws.String(DynamoDBPrefixItem)},
@@ -84,4 +99,9 @@ func (h *Handler) List(ctx context.Context) (*List, error) {
 	}
 
 	return &l, nil
+}
+
+//getItemGSI1SK returns the categoryID formatted for the gsi1pk
+func getItemGSI1SK(categoryID string) string {
+	return fmt.Sprintf("%s%s", DynamoDBPrefixCategory, categoryID)
 }
