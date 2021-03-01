@@ -1,27 +1,6 @@
 service: store
+
 frameworkVersion: '2'
-
-plugins:
- - serverless-localstack
-
-custom:
-
-  localstack:
-    stages:
-      # list of stages for which the plugin should be enabled
-      - local
-    host: http://localhost  # optional - LocalStack host to connect to
-    edgePort: 4566  # optional - LocalStack edge port to connect to
-    autostart: true  # optional - start LocalStack in Docker on Serverless deploy
-    lambda:
-      # Enable this flag to improve performance
-      mountCode: True
-    docker:
-      # Enable this flag to run "docker ..." commands as sudo
-      sudo: False
-  stages:
-    local:
-      ...
 
 provider:
   name: aws
@@ -35,7 +14,7 @@ provider:
     STORE_AWS_DYNAMODB_TABLE_STORE: ${env:STORE_AWS_DYNAMODB_TABLE_STORE, 'Store'}
     STORE_AWS_REGION: ${env:STORE_AWS_REGION, 'us-west-2'}
     STORE_LOG_LEVEL: ${env:STORE_LOG_LEVEL, 'info'}
-    DYNAMODB_BACKEND: "${self:custom.localstack.host}:{self:custom.localstack.edgePort}"
+
 
   iamRoleStatements:
     - Effect: "Allow"

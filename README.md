@@ -1,3 +1,16 @@
+# DO NOT USE THIS BRANCH
+As of now, this branch is deprecated. It illustrates how to deploy the application locally, using localstack.
+However, it requires a change in the code, which is, we need to specify a different DynamoDB Endpoint in the configuration.
+Will try to find another solution to deploy locally, where these type of changes in the configuration are not required.
++       var dynamodbConfig *aws.Config
++       if os.Getenv("STAGE") == "local" {
++               dynamodbConfig.Endpoint = aws.String(os.Getenv("DYNAMODB_BACKEND"))
++       }
++
++       dynamoSvc := dynamodb.New(sess, dynamodbConfig)
+
+        return dynamoSvc
+
 # Store
 This is a simple implementation of a shopping cart using Go, Serverless, AWS Lambda and DynamoDB.
 
@@ -79,7 +92,7 @@ Adds an item to an existing shopping cart. Parameters:
   - "description"
   - "quantity"
   - "price"
- 
+
  If a cart_id is sent in the request, it will return an error
 
 - PATCH: /cart/{cartId}/items/{itemId}
@@ -89,38 +102,52 @@ Updates the quantity of an item in the shopping cart. Parameters:
 - DELETE: /cart/{cartId}/items/{itemId}
 Deletes an item from the shopping cart
 
+# AWS vs local environment for the backend component
+The backend component of this project can also use the localstack plugin to be deployed locally. Follow instructions for localstack
+
 # Requirements
 - go version go1.15.5
 - NPM Version 15.10.0
-- aws-cli/2.0.58 Python/3.7.4
-- serverless framework version 2
+- Python/3.7.4
+- aws-cli/2.0.58
+- serverless framework version 2 (npm install -g serverless)
+
+#Requirements for localstack
+- pip pip 21.0.1
+- docker
 
 # Installation
 
+## AWS Configuration
+Run the following command to configure the AWS profile. This is required for both AWS and localstack Installation
+- $ aws --profile [profile_name] configure
+  - AWS Access Key ID [None]: <access key>
+  - AWS Secret Access Key [None]: <secret key>
+  - Default region name [None]: <AWS region>
+  - Default output format [None]: json
+
 ## Environment variables
- - STORE_AWS_DYNAMODB_TABLE_STORE: DynamoDB table name
- - STORE_AWS_REGION: AWS Region where the application is stored
- - STORE_LOG_PRETTY: Human-friendly log format [pretty]
- - STORE_LOG_LEVEL: Zerolog level [error,warn,info,debug,trace] default:info
+- STORE_AWS_DYNAMODB_TABLE_STORE: DynamoDB table name
+- STORE_LOG_PRETTY: Human-friendly log format [pretty]
+- STORE_LOG_LEVEL: Zerolog level [error,warn,info,debug,trace] default:info
 
 ## Environment variables for test cases
 As of now, the test cases for the cart package are run against a mock of the DynamoDB client. If you want to use a real dynamodb connection, the environment configuration needs to be updated in the following file:
- - api/internal/test/environment.go
+- api/internal/test/environment.go
 
-## AWS Profile
-
-You can create a specific profile for deploying the application to AWS and save it on your credentials file:
-- ~/.aws/credentials
-[profile_name]
-aws_access_key_id = [access_key]
-aws_secret_access_key = [secret_key]
-
-## Installing Backend component
+## Installing Backend component in AWS
 - cd api
 - make
 - sls deploy --aws-profile [profile_name]
 - aws dynamodb batch-write-item --request-items file://seed/itemsCatalog.json
 - store the endpoint server url since we're going to need it for the React application
+
+## Installing Backend component in localstac
+- pip install localstack (Note: Please do not use sudo or the root user - LocalStack should be installed and started entirely under a local non-root user.)
+- npm install --save-dev serverless-localstack
+- docker network create localstack
+- sls deploy --stage local --aws-profile [profile_name]
+
 
 ## Installing react application
 - cd web
