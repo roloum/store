@@ -24,8 +24,6 @@ The following is a list of ideas that, due to initial requirements or time const
 - More test coverage
 
 ## Improvements
-- Change Item pk to be ITEM#<item_id>, so we can validate only existing items are added to carts
-- Use a gsi to load items per category
 - Back button in the items list page does not work
 - The very first time an item is deleted from the shopping cart, there is an error while rendering the page. The code still goes ahead and renders the page and you can continue adding and deleting products. The error is only seen in the developer console.
 
