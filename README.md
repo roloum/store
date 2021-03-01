@@ -2,6 +2,7 @@
 As of now, this branch is deprecated. It illustrates how to deploy the application locally, using localstack.
 However, it requires a change in the code, which is, we need to specify a different DynamoDB Endpoint in the configuration.
 Will try to find another solution to deploy locally, where these type of changes in the configuration are not required.
+```
 +       var dynamodbConfig *aws.Config
 +       if os.Getenv("STAGE") == "local" {
 +               dynamodbConfig.Endpoint = aws.String(os.Getenv("DYNAMODB_BACKEND"))
@@ -10,6 +11,7 @@ Will try to find another solution to deploy locally, where these type of changes
 +       dynamoSvc := dynamodb.New(sess, dynamodbConfig)
 
         return dynamoSvc
+```
 
 # Store
 This is a simple implementation of a shopping cart using Go, Serverless, AWS Lambda and DynamoDB.
