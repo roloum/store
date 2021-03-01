@@ -53,6 +53,10 @@ var (
 
 	//ErrCouldNotLoadCart error returned if we failed to load the cart
 	ErrCouldNotLoadCart = errors.New("CouldNotLoadCart")
+
+	//ErrItemDoesNotExist error returned if we try to add to a cart an item that
+	//does not exist
+	ErrItemDoesNotExist = errors.New("ItemDoesNotExist")
 )
 
 //Handler struct is a handler for executing the actions related to the shopping cart
@@ -109,6 +113,17 @@ func (h *Handler) CreateAndAddItem(ctx context.Context, ni *NewItemInfo) (*Cart,
 					ConditionExpression: aws.String("attribute_not_exists(pk) and attribute_not_exists(sk)"),
 				},
 			},
+			//The condition check verifies the item exists in the database
+			{
+				ConditionCheck: &dynamodb.ConditionCheck{
+					Key: map[string]*dynamodb.AttributeValue{
+						"pk": {S: aws.String(getItemPK(ni.ItemID))},
+						"sk": {S: aws.String(getItemSK(ni.ItemID))},
+					},
+					TableName:           aws.String(h.tableName),
+					ConditionExpression: aws.String("attribute_exists(pk) and attribute_exists(sk)"),
+				},
+			},
 			{
 				Put: &dynamodb.Put{
 					Item: map[string]*dynamodb.AttributeValue{
@@ -129,6 +144,15 @@ func (h *Handler) CreateAndAddItem(ctx context.Context, ni *NewItemInfo) (*Cart,
 	})
 
 	if err != nil {
+
+		//cancellationIdx is the index of the TransactWriteItem in the
+		//TransactWriteItems array
+		cancellationIdx := 1
+		if isAwsErrorOfType(err, cancellationIdx, dynamodb.BatchStatementErrorCodeEnumConditionalCheckFailed) {
+			log.Error().Msgf("Item does not exist: %s", err.Error())
+			return nil, ErrItemDoesNotExist
+		}
+
 		log.Error().Msgf("Error creating cart: %s", err.Error())
 		return nil, ErrCreateCart
 	}
@@ -151,35 +175,62 @@ func (h *Handler) AddItem(ctx context.Context, ni *NewItemInfo) (*Cart, error) {
 
 	log.Debug().Msgf("Adding item %s to cart %s", ni.Description, ni.CartID)
 
-	_, err := h.svc.UpdateItemWithContext(ctx, &dynamodb.UpdateItemInput{
-		Key: map[string]*dynamodb.AttributeValue{
-			"pk": {S: aws.String(getCartPK(ni.CartID))},
-			"sk": {S: aws.String(getItemSK(ni.ItemID))},
+	//Check that the item exists before adding to the cart
+	_, err := h.svc.TransactWriteItemsWithContext(ctx, &dynamodb.TransactWriteItemsInput{
+		TransactItems: []*dynamodb.TransactWriteItem{
+			{
+				ConditionCheck: &dynamodb.ConditionCheck{
+					Key: map[string]*dynamodb.AttributeValue{
+						"pk": {S: aws.String(getItemPK(ni.ItemID))},
+						"sk": {S: aws.String(getItemSK(ni.ItemID))},
+					},
+					TableName:           aws.String(h.tableName),
+					ConditionExpression: aws.String("attribute_exists(pk) and attribute_exists(sk)"),
+				},
+			},
+			{
+				Update: &dynamodb.Update{
+					Key: map[string]*dynamodb.AttributeValue{
+						"pk": {S: aws.String(getCartPK(ni.CartID))},
+						"sk": {S: aws.String(getItemSK(ni.ItemID))},
+					},
+					ExpressionAttributeNames: map[string]*string{
+						"#t": aws.String("type"),
+						"#c": aws.String("cart_id"),
+						"#i": aws.String("item_id"),
+						"#d": aws.String("description"),
+						"#p": aws.String("price"),
+						"#q": aws.String("quantity"),
+					},
+					ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+						":t":    {S: aws.String(DynamoDBRowTypeCartItem)},
+						":c":    {S: aws.String(ni.CartID)},
+						":i":    {S: aws.String(ni.ItemID)},
+						":d":    {S: aws.String(ni.Description)},
+						":p":    {N: aws.String(fmt.Sprintf("%f", ni.Price))},
+						":q":    {N: aws.String(strconv.Itoa(ni.Quantity))},
+						":zero": {N: aws.String(strconv.Itoa(0))},
+					},
+					UpdateExpression: aws.String(
+						"set #t=:t, #c=:c, #i=:i, #d=:d, #p=:p, #q = if_not_exists(#q, :zero) + :q",
+					),
+					TableName: aws.String(h.tableName),
+				},
+			},
 		},
-		ExpressionAttributeNames: map[string]*string{
-			"#t": aws.String("type"),
-			"#c": aws.String("cart_id"),
-			"#i": aws.String("item_id"),
-			"#d": aws.String("description"),
-			"#p": aws.String("price"),
-			"#q": aws.String("quantity"),
-		},
-		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":t":    {S: aws.String(DynamoDBRowTypeCartItem)},
-			":c":    {S: aws.String(ni.CartID)},
-			":i":    {S: aws.String(ni.ItemID)},
-			":d":    {S: aws.String(ni.Description)},
-			":p":    {N: aws.String(fmt.Sprintf("%f", ni.Price))},
-			":q":    {N: aws.String(strconv.Itoa(ni.Quantity))},
-			":zero": {N: aws.String(strconv.Itoa(0))},
-		},
-		UpdateExpression: aws.String(
-			"set #t=:t, #c=:c, #i=:i, #d=:d, #p=:p, #q = if_not_exists(#q, :zero) + :q",
-		),
-		TableName: aws.String(h.tableName),
-	})
+	},
+	)
 
 	if err != nil {
+
+		//cancellationIdx is the index of the TransactWriteItem in the
+		//TransactWriteItems array
+		cancellationIdx := 0
+		if isAwsErrorOfType(err, cancellationIdx, dynamodb.BatchStatementErrorCodeEnumConditionalCheckFailed) {
+			log.Error().Msgf("Item does not exist: %s", err.Error())
+			return nil, ErrItemDoesNotExist
+		}
+
 		log.Error().Msgf("Error adding item: %s", err.Error())
 		return nil, ErrCouldNotAddItem
 	}
@@ -316,4 +367,20 @@ func getCartPK(cartID string) string {
 //getItemSK returns the itemID formatted for the sort key column in the database
 func getItemSK(itemID string) string {
 	return fmt.Sprintf("%s%s", DynamoDBPrefixItem, itemID)
+}
+
+//getItemPK returns the itemID formatted for the primary key column
+func getItemPK(itemID string) string {
+	return fmt.Sprintf("%s%s", DynamoDBPrefixItem, itemID)
+}
+
+//isAwsErrorOfType returns true if an aws error code is of certain type
+func isAwsErrorOfType(err error, cancellationIdx int, awsErrorCode string) bool {
+	switch t := err.(type) {
+	case *dynamodb.TransactionCanceledException:
+		if *t.CancellationReasons[cancellationIdx].Code == awsErrorCode {
+			return true
+		}
+	}
+	return false
 }
