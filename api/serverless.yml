@@ -27,6 +27,12 @@ provider:
         - dynamodb:ConditionCheckItem
       Resource:
         - Fn::GetAtt: [storeTable, Arn]
+        # Include global secondary indexes
+        - Fn::Join:
+          - "/"
+          -
+            - Fn::GetAtt: [storeTable, Arn]
+            - "index/*"
 
 resources:
   Resources:
@@ -45,11 +51,28 @@ resources:
             AttributeType: S
           - AttributeName: sk
             AttributeType: S
+          - AttributeName: gsi1pk
+            AttributeType: S
+          - AttributeName: gsi1sk
+            AttributeType: S
         KeySchema:
           - AttributeName: pk
             KeyType: HASH
           - AttributeName: sk
             KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: gsi1pk
+            KeySchema:
+              - AttributeName: gsi1pk
+                KeyType: HASH
+              - AttributeName: gsi1sk
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+
 
 package:
   exclude:
@@ -63,7 +86,7 @@ functions:
     events:
       # Returns a list with the information of all items
       - http:
-          path: items
+          path: items/{category_id}
           method: get
           cors: true
   cart:
