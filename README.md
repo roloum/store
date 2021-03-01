@@ -58,8 +58,8 @@ The frontend application is implemented using React. It requires npm to run.
 
 # API Endpoints
 There are 5 API endpoints:
-- GET: /items
-Retrieves the list of items by category. Right now, there is only one category.
+- GET: /items/{categoryId}
+Retrieves the list of items by category. Right now, there is only categoryId 1.
 
 - GET: /cart/{cartId}
 Retrieves the information of a shopping cart
