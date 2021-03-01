@@ -3,3 +3,6 @@ api/.serverless
 
 # golang output binary directory
 api/bin
+
+# node modules
+node_modules
