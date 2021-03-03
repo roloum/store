@@ -93,6 +93,16 @@ Deletes an item from the shopping cart
 - aws-cli/2.0.58 Python/3.7.4
 - serverless framework version 2
 
+## IAM Roles for deploying the backend component
+There should be a user with necessary permissions to deploy and run the application in AWS
+- IAM access
+- AmazonS3 access
+- AmazonAPIGatewayInvoke Access
+- AmazonAPIGatewayPushToCloudWatchLogs
+- AmazonDynamoDBFullAccess
+- AWSCloudFormation Access
+- AWSLambda Access
+
 # Installation
 
 ## Environment variables
