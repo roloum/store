@@ -12,9 +12,10 @@ class Cart extends React.Component {
     this.handleDeleteItemClick = this.handleDeleteItemClick.bind(props.parent);
     this.deleteItemOnClick = props.deleteItemOnClick;
 
-    this.getCart = props.getCart;
+    this.updateSubTotal = props.updateSubTotal;
 
     this.state = {
+      cartId: props.cartId,
       cart: props.cart
     };
   }
@@ -27,11 +28,11 @@ class Cart extends React.Component {
 
   handleDeleteItemClick (item) {
 
-    const cart = this.state.cart;
+    const cartId = this.state.cartId;
 
     const serverUrl = "https://changethisurl.com";
 
-    const endpoint = "/cart/"+cart.cart_id+"/items/"+item.item_id;
+    const endpoint = "/cart/"+cartId+"/items/"+item.item_id;
     const url = serverUrl + endpoint;
 
     fetch(url, {
@@ -57,6 +58,46 @@ class Cart extends React.Component {
       console.log("Error: ", e);
     });
 
+  }
+
+  componentDidMount () {
+    if (this.state.cartId === null) {
+      return;
+    }
+
+    const serverUrl = "https://changethisurl.com";
+
+    const endpoint = "/cart/"+this.state.cartId;
+    const url = serverUrl + endpoint;
+
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then( (response) => {
+
+      if (!response.ok) {
+          throw new TypeError(`Error retrieving cartID: `+ this.state.cartId);
+      }
+
+      return response.json();
+
+    })
+    .then( (result) => {
+      this.setState({
+        cart: result
+      })
+
+      console.log("please update totals from cart")
+      this.updateSubTotal(result)
+
+    })
+    .catch(e => {
+      //Display error message
+      console.log("Error: ", e);
+    });
   }
 
   render() {
