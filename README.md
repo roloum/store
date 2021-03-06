@@ -1,6 +1,9 @@
 # Store
 This is a simple implementation of a shopping cart using Go, Serverless, AWS Lambda and DynamoDB.
 
+## Disclosure
+This was the first time I ever used React. The code might not be what a React Developer would expect to see, since this was a coding exercise with limited time frame, but I'm tryin to improve it.
+
 # Considerations
 The following is a list of ideas that, due to initial requirements or time constraints, can not be implemented right now but should be taken into consideration.
 
@@ -51,7 +54,10 @@ There are 3 entities in the application:
  - Cart
 
 There is a 1-N relationship between Category and Item.
+
 There is a N-N relationship between Cart and Item.
+
+The Item row has a GSI with CategoryID, that allow us to load items by Category. That way we can use the ItemID in the Item row as PK, so we can validate that only existing items are added to shopping carts.
 
 ## Frontend component
 The frontend application is implemented using React. It requires npm to run.
